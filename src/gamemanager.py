@@ -1,6 +1,6 @@
 import pygame
 from pygame.math import Vector2
-from utils.stage import *
+from utils.stage import Stage, HEIGHT, WIDTH
 from utils.time import Time
 from entities.platformmanager import PlatformManager
 from entities.player import PlayerController
@@ -9,19 +9,20 @@ class GameManager:
     
     clock = None
 
-    def initialize(self):
+    def __init__(self):
         pygame.init()
 
         pygame.display.set_caption("Hello World!")
-        Stage.stage = pygame.display.set_mode((Width, Height))
+        Stage.stage = pygame.display.set_mode((WIDTH, HEIGHT))
         GameManager.clock = pygame.time.Clock()
 
         self.player = PlayerController(Vector2(100, 100))
+        PlatformManager.initialize()
 
         self.load_content()
 
     def load_content(self):
-        
+
         self.update()
 
     def update(self):
