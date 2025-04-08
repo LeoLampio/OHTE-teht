@@ -1,7 +1,15 @@
-# Ohjelmistotekniikka, harjoitustyö
+# Physics Based Platformer
 
-I am **making** a *game*.
+## Support
+Tested on a Cubbli machine with Python 3.10.
 
-[Laskarit](https://github.com/LeoLampio/OHTE-teht/tree/main/laskarit)\
-[Vaatimuksia](https://github.com/LeoLampio/OHTE-teht/blob/main/dokumentaatio/vaatimusmaarittely.md)\
-[Tuntikirjaus](https://github.com/LeoLampio/OHTE-teht/blob/main/dokumentaatio/tuntikirjanpito.md)
+## Documentation
+[Planned Features](https://github.com/LeoLampio/OHTE-teht/blob/main/dokumentaatio/vaatimusmaarittely.md)\
+[Time Used / Week](https://github.com/LeoLampio/OHTE-teht/blob/main/dokumentaatio/tuntikirjanpito.md)\
+[ChangeLog](https://github.com/LeoLampio/OHTE-teht/blob/main/dokumentaatio/changelog.md)
+
+## Running the Application
+
+## Testing
+
+## Test Coverage Report
