@@ -1,9 +1,11 @@
 from pygame.time import Clock, get_ticks
 
-# Keep time
+# Keeps time
 
 class Time:
+    # 'deltatime' or the time in between frames
     dt = 0
+    # Total time since the game began
     time = 0
 
     @classmethod

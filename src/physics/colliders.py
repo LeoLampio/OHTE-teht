@@ -10,6 +10,7 @@ class Collider:
         self.pos = pos
         self._bounds = None
     
+    # Slightly larger than the actual bounds because it helps the player stick to colliders
     @property
     def bounds(self):
         return Rect(self._bounds.left + self.pos.x - 3, self._bounds.top + self.pos.y - 3, 
@@ -61,7 +62,6 @@ class PolygonCollider(Collider):
     @property
     def degree(self):
         return self.__vert_count
-
     @property
     def is_clockwise(self):
         return self.__clockwise
@@ -72,15 +72,18 @@ class PolygonCollider(Collider):
     def centroid(self):
         return self.__centroid + self.pos
 
+    # The collider has to be convex and the vertices need to be in order
     def __check_convex(self):
         sign = Vector2.cross(self.__vertices[-1] - self.__vertices[0], 
                              self.__vertices[1] - self.__vertices[0])
         for i in range(1, self.__vert_count):
-            if (sign * Vector2.cross(self.__vertices[i - 1] - self.__vertices[i], 
-                    self.__vertices[(i + 1) % self.__vert_count] - self.__vertices[i]) < 0):
+            v1 = self.__vertices[i - 1] - self.__vertices[i]
+            v2 = self.__vertices[(i + 1) % self.__vert_count] - self.__vertices[i]
+            if (sign * Vector2.cross(v1, v2) < 0):
                 raise ValueError("Polygon Collider only supports convex polygons!")
         self.__clockwise = sign < 0
     
+    # bounds = the smallest AABB (axis aligned bounding box), which the polygon can fit in
     def __compute_bounds(self):
         _min = Vector2(self.__vertices[0].x, self.__vertices[0].y)
         _max = Vector2(self.__vertices[0].x, self.__vertices[0].y)
@@ -95,6 +98,7 @@ class PolygonCollider(Collider):
                 _max.y = v.y
         self._bounds = Rect(_min.x, _min.y, _max.x - _min.x, _max.y - _min.y)
 
+    # Calculate the normal vector for every edge of the polygon
     def __compute_normals(self):
         self.__normals = []
         for i in range(self.__vert_count):
@@ -102,8 +106,9 @@ class PolygonCollider(Collider):
             v1 = self.__vertices[(i + 1) % self.__vert_count]
             v01 = Vector2.normalize(v1 - v0)
             self.__normals.append(Vector2(v01.y, -v01.x) if self.__clockwise 
-                                else Vector2(-v01.y, v01.x))
+                                  else Vector2(-v01.y, v01.x))
 
+    # centroid = center of rotation
     def __compute_centroid(self):
         _sum = Vector2(0, 0)
         for v in self.__vertices:

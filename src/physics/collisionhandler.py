@@ -10,8 +10,11 @@ class CollisionInfo:
         self.overlap = overlap
         self.point = point
 
+    # Resolve collision fully
     def get_offset_out(self):
         return self.normal * (self.overlap + Collider.SkinWidth)
+    
+    # Keep the colliders barely touching
     def get_offset_in(self):
         return self.normal * (self.overlap - Collider.SkinWidth)
 
@@ -32,6 +35,7 @@ class CollisionHandler:
         d2 = Vector2.length_squared(c1.pos - c2.pos)
         radii = c1.radius + c2.radius
 
+        # avoid expensive square root
         if (radii**2 < d2):
             return None
         
@@ -41,6 +45,7 @@ class CollisionHandler:
     
     @classmethod
     def circle_polygon(cls, c: CircleCollider, p: PolygonCollider):
+        # broad phase
         if (not Collider.overlap(c.bounds, p.bounds)):
             return None
         
@@ -61,9 +66,9 @@ class CollisionHandler:
         # Go over vertices
         for v in p.vertices:
             if (cls.point_in_circle(c, v)):
-                return CollisionInfo(Vector2.normalize(c.pos - v), 
-                                     c.radius - Vector2.length(c.pos - v), v)
+                return CollisionInfo(Vector2.normalize(c.pos - v), c.radius - Vector2.length(c.pos - v), v)
 
+        # no collision
         return None
 
     @classmethod

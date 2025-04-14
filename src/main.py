@@ -1,4 +1,4 @@
-import gamemanager
+from utils.gamemanager import GameManager
 
 if __name__ == "__main__":
-    gamemanager.GameManager()
+    GameManager()

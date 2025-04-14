@@ -1,7 +1,8 @@
+import math
 import pygame
 from pygame.math import Vector2
 from utils.time import Time
-from physics.colliders import Collider, CircleCollider
+from physics.colliders import Collider, CircleCollider, PolygonCollider
 from physics.collisionhandler import CollisionHandler
 from entities.player import PlayerController
 
@@ -27,7 +28,7 @@ class Platform:
         if (isinstance(self.coll, CircleCollider)):
             pygame.draw.circle(surf, self.__color, self.coll.pos, self.coll.radius)
         else:
-            pygame.draw.polygon(surf, self.__color, self.coll.Vertices)
+            pygame.draw.polygon(surf, self.__color, self.coll.vertices)
 
 # Generates and updates Platform objects
 
@@ -36,8 +37,15 @@ class PlatformManager:
 
     @classmethod
     def generate(cls):
-        circle = CircleCollider(Vector2(600, 1000), 100)
+        circle = CircleCollider(Vector2(600, 800), 100)
         cls.current_platforms.append(Platform(True, circle, (255, 255, 255)))
+
+        vs = []
+        n = 7
+        for i in range(n):
+            vs.append(Vector2(math.cos(math.pi * 2 / n * i), math.sin(math.pi * 2 / n * i)) * 100)
+        poly = PolygonCollider(Vector2(200, 600), vs)
+        cls.current_platforms.append(Platform(True, poly, (255, 255, 255)))
 
     @classmethod
     def update(cls):
@@ -48,17 +56,19 @@ class PlatformManager:
                 c.move()
                 cls.__dynamic_check(c)
 
+    # Check player collision against a non moving platform
     @classmethod
     def __static_check(cls, c: Platform):
         info = CollisionHandler.circle_collision(PlayerController.instance.coll, c.coll)
         if (info is not None):
             PlayerController.instance.collision_response(info)
 
+    # Check player collision against a moving platform
     @classmethod
     def __dynamic_check(cls, c: Platform):
         info = CollisionHandler.circle_collision(PlayerController.instance.coll, c.coll)
         if (info is not None):
-            PlayerController.instance.collision_response(info)
+            PlayerController.instance.collision_response(info, c.vel * Time.dt)
 
     @classmethod
     def draw(cls, surf):

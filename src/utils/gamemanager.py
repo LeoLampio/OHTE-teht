@@ -21,8 +21,8 @@ class GameManager:
 
         self.load_content()
 
+    # Load assets
     def load_content(self):
-
         self.update()
 
     def update(self):
@@ -36,6 +36,7 @@ class GameManager:
             self.window.draw()
             self.clock.tick(60)
 
+    # Press ESC to exit the game
     def check_events(self):
         for event in pygame.event.get():
             if (event.type == pygame.KEYDOWN):

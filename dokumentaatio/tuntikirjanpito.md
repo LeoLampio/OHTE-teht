@@ -4,4 +4,4 @@
 | :----:|:-----| :-----|
 | 1.4 | 3-4 h | primarily physics |
 | 8.4 | 4-5 h | added collision with polygons |
-| 14.4 | 4.5 h | refactored the whole project |
+| 14.4 | 6 h | refactored the whole project |
