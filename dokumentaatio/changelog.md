@@ -8,3 +8,6 @@
 **Added:**
 - polygons the player can stick to
 - collision between circle and polygon colliders
+
+## Week 5
+- massive refactoring

@@ -11,28 +11,28 @@ from entities.player import PlayerController
 class Platform:
     def __init__(self, static: bool, collider: Collider, color: tuple):
         self.is_static = static
-        self.Vel = Vector2(0, 0)
+        self.vel = Vector2(0, 0)
 
-        self.Coll = collider
+        self.coll = collider
         self.__color = color
     
     def move(self):
-        self.Coll.pos += self.Vel * Time.dt
+        self.coll.pos += self.vel * Time.dt
 
     def set_velocity(self, new_vel: Vector2):
-        self.Vel = new_vel
-        self.is_static = self.Vel == Vector2(0, 0)
+        self.vel = new_vel
+        self.is_static = self.vel == Vector2(0, 0)
 
     def draw(self, surf):
-        if (type(self.Coll) is CircleCollider):
-            pygame.draw.circle(surf, self.__color, self.Coll.pos, self.Coll.R)
+        if (isinstance(self.coll, CircleCollider)):
+            pygame.draw.circle(surf, self.__color, self.coll.pos, self.coll.radius)
         else:
-            pygame.draw.polygon(surf, self.__color, self.Coll.Vertices)
+            pygame.draw.polygon(surf, self.__color, self.coll.Vertices)
 
 # Generates and updates Platform objects
 
 class PlatformManager:
-    current_platforms: list[Platform] = list()
+    current_platforms: list[Platform] = []
 
     @classmethod
     def generate(cls):
@@ -50,14 +50,14 @@ class PlatformManager:
 
     @classmethod
     def __static_check(cls, c: Platform):
-        info = CollisionHandler.circle_collision(PlayerController.instance.Coll, c.Coll)
-        if (info != None):
+        info = CollisionHandler.circle_collision(PlayerController.instance.coll, c.coll)
+        if (info is not None):
             PlayerController.instance.collision_response(info)
 
     @classmethod
     def __dynamic_check(cls, c: Platform):
-        info = CollisionHandler.circle_collision(PlayerController.instance.Coll, c.Coll)
-        if (info != None):
+        info = CollisionHandler.circle_collision(PlayerController.instance.coll, c.coll)
+        if (info is not None):
             PlayerController.instance.collision_response(info)
 
     @classmethod

@@ -11,13 +11,14 @@ class Collider:
         self._bounds = None
     
     @property
-    def Bounds(self):
+    def bounds(self):
         return Rect(self._bounds.left + self.pos.x - 3, self._bounds.top + self.pos.y - 3, 
                     self._bounds.width + 6, self._bounds.height + 6)
     
     @classmethod
     def overlap(cls, bounds1: Rect, bounds2: Rect) -> bool:
-        return bounds1.right > bounds2.left and bounds1.bottom > bounds2.top and bounds1.left < bounds2.right and bounds1.top < bounds2.bottom
+        return bounds1.right > bounds2.left and bounds1.bottom > bounds2.top \
+               and bounds1.left < bounds2.right and bounds1.top < bounds2.bottom
 
 # A radial collider around a given position
 
@@ -29,10 +30,10 @@ class CircleCollider(Collider):
         self._bounds = Rect(-self.__radius, -self.__radius, self.__radius * 2, self.__radius * 2)
     
     @property
-    def R(self):
+    def radius(self):
         return self.__radius
     @property
-    def R2 (self):
+    def radius_squared(self):
         return self.__r2
 
 # A convex polygon collider defined by a set of vertices
@@ -45,7 +46,7 @@ class PolygonCollider(Collider):
         """
         super().__init__(pos)
         if (len(vertex_array) < 3):
-            raise Exception("A polygon must have a minimum of 3 vertices!")
+            raise ValueError("A polygon must have a minimum of 3 vertices!")
         
         self.__vertices = vertex_array
         self.__vert_count = len(vertex_array)
@@ -55,20 +56,20 @@ class PolygonCollider(Collider):
         self.__compute_centroid()
 
     @property
-    def Vertices(self):
+    def vertices(self):
         return [v + self.pos for v in self.__vertices]
     @property
-    def N(self):
+    def degree(self):
         return self.__vert_count
 
     @property
-    def Is_clockwise(self):
+    def is_clockwise(self):
         return self.__clockwise
     @property
-    def Normals(self):
+    def normals(self):
         return self.__normals
     @property
-    def Centroid(self):
+    def centroid(self):
         return self.__centroid + self.pos
 
     def __check_convex(self):
@@ -77,7 +78,7 @@ class PolygonCollider(Collider):
         for i in range(1, self.__vert_count):
             if (sign * Vector2.cross(self.__vertices[i - 1] - self.__vertices[i], 
                     self.__vertices[(i + 1) % self.__vert_count] - self.__vertices[i]) < 0):
-                raise Exception("Polygon Collider only supports convex polygons!")
+                raise ValueError("Polygon Collider only supports convex polygons!")
         self.__clockwise = sign < 0
     
     def __compute_bounds(self):

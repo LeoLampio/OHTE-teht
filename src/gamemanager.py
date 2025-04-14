@@ -1,3 +1,4 @@
+import sys
 import pygame
 from pygame.math import Vector2
 from utils.stage import Stage
@@ -42,4 +43,4 @@ class GameManager:
                     self.on_exit()
 
     def on_exit(self):
-        exit()
+        sys.exit()

@@ -25,10 +25,10 @@ class PlayerController:
         self.__jump_axis = Vector2(0, -1)
         self.__move_axis = Vector2(1, 0)
 
-        self.Vel = Vector2(0, 0)
+        self.vel = Vector2(0, 0)
         self.__surface_vel = Vector2(0, 0)
 
-        self.Coll = CircleCollider(startpos, radius)
+        self.coll = CircleCollider(startpos, radius)
         self.__last_collision_point = Vector2(0, -1000)
 
         PlayerController.instance = self
@@ -54,7 +54,7 @@ class PlayerController:
 # - - - - Ground Update - - - -
 
     def __grounded_update(self):
-        self.__surface_vel = Vector2(Vector2.dot(self.__move_axis, self.Vel), Vector2.dot(self.__jump_axis, self.Vel))
+        self.__surface_vel = Vector2(Vector2.dot(self.__move_axis, self.vel), Vector2.dot(self.__jump_axis, self.vel))
 
         self.__read_input()
         self.__apply_horizontal_accel()
@@ -62,7 +62,7 @@ class PlayerController:
         self.__clamp_velocity()
         self.__handle_jumping()
 
-        self.Vel = self.__surface_vel.x * self.__move_axis + self.__surface_vel.y * self.__jump_axis
+        self.vel = self.__surface_vel.x * self.__move_axis + self.__surface_vel.y * self.__jump_axis
 
     def __read_input(self):
         self.__input = 0
@@ -111,25 +111,25 @@ class PlayerController:
         self.__apply_gravity()
 
     def __apply_gravity(self):
-        self.Vel.y += self.__gravity * Time.dt
-        self.Vel.y = min(self.Vel.y, self.__terminal_vel)
+        self.vel.y += self.__gravity * Time.dt
+        self.vel.y = min(self.vel.y, self.__terminal_vel)
 
 # - - - - Others - - - -
 
     def __move(self):
-        self.Coll.pos += self.Vel * Time.dt
+        self.coll.pos += self.vel * Time.dt
 
     def collision_response(self, info: CollisionInfo):
-        self.Coll.pos += info.get_offset_in()
+        self.coll.pos += info.get_offset_in()
         self.__last_collision_point = info.point
 
         self.__jump_axis = info.normal
         self.__move_axis = Vector2(-info.normal.y, info.normal.x)
 
         tangent = Vector2(-info.normal.y, info.normal.x)
-        self.Vel = Vector2.dot(tangent, self.Vel) * tangent
+        self.vel = Vector2.dot(tangent, self.vel) * tangent
         self.__is_grounded = True
 
     def draw(self, surf):
-        pygame.draw.circle(surf, (255, 0, 0), self.Coll.pos, self.Coll.R)
+        pygame.draw.circle(surf, (255, 0, 0), self.coll.pos, self.coll.radius)
         pygame.draw.circle(surf, (0, 255, 0), self.__last_collision_point, 5)
