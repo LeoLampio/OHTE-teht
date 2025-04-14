@@ -1,23 +1,22 @@
 import pygame
 from pygame.math import Vector2
-from utils.stage import Stage, HEIGHT, WIDTH
+from utils.stage import Stage
 from utils.time import Time
-from entities.platformmanager import PlatformManager
+from entities.platforms import PlatformManager
 from entities.player import PlayerController
 
-class GameManager:
-    
-    clock = None
+# Manages Game States & Updating
 
+class GameManager:
     def __init__(self):
         pygame.init()
 
         pygame.display.set_caption("Hello World!")
-        Stage.stage = pygame.display.set_mode((WIDTH, HEIGHT))
-        GameManager.clock = pygame.time.Clock()
+        self.window = Stage(pygame.display.set_mode((1200, 1000)))
+        self.clock = pygame.time.Clock()
 
-        self.player = PlayerController(Vector2(100, 100))
-        PlatformManager.initialize()
+        self.player = PlayerController(Vector2(600, 500), 30)
+        PlatformManager.generate()
 
         self.load_content()
 
@@ -27,24 +26,20 @@ class GameManager:
 
     def update(self):
         while (True):
-            Time.update(GameManager.clock)
+            Time.update(self.clock)
             self.check_events()
             
             self.player.update()
+            PlatformManager.update()
 
-            self.draw()
-            GameManager.clock.tick(60)
+            self.window.draw()
+            self.clock.tick(60)
 
     def check_events(self):
         for event in pygame.event.get():
             if (event.type == pygame.KEYDOWN):
                 if (event.key == pygame.K_ESCAPE):
-                    exit()
+                    self.on_exit()
 
-    def draw(self):
-        Stage.stage.fill((0, 0, 0))
-
-        PlatformManager.draw()
-        self.player.draw()
-
-        pygame.display.flip()
+    def on_exit(self):
+        exit()

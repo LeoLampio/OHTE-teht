@@ -1,139 +1,135 @@
 import math
-from pygame.math import Vector2
 import pygame
+from pygame.math import Vector2
 from utils.time import Time
-from utils.stage import Stage, HEIGHT
-from physics.colliders import CircleCollider, skin_width
-from physics.collisionhandler import CollisionHandler, CollisionInfo
-from entities.platformmanager import PlatformManager
+from physics.colliders import CircleCollider
+from physics.collisionhandler import CollisionInfo
+
+# Handles player movement and response to physics
 
 class PlayerController:
+    instance: "PlayerController" = None
 
-    def __init__(self, startpos: Vector2):
-        self.input = 0
-        self.jump_pressed = False
-        self.is_grounded = False
-        self.can_jump = False
+    def __init__(self, startpos: Vector2, radius: float):
+        self.__input = 0
+        self.__jump_pressed = False
+        self.__is_grounded = False
+        self.__can_jump = False
 
-        self.speed = 300
-        self.accel = self.speed / 0.5
-        self.drag = 1 / 40
+        self.__max_speed = 300
+        self.__accel = self.__max_speed / 0.5
+        self.__friction = 1 / 40
 
-        self.initialize_gravity()
+        self.__initialize_gravity()
 
-        self.surface_normal = Vector2(0, 0)
-        self.jump_dir = Vector2(0, -1)
-        self.move_dir = Vector2(1, 0)
+        self.__jump_axis = Vector2(0, -1)
+        self.__move_axis = Vector2(1, 0)
 
-        self.vel = Vector2(0, 0)
-        self.surface_vel = Vector2(0, 0)
+        self.Vel = Vector2(0, 0)
+        self.__surface_vel = Vector2(0, 0)
 
-        self.coll = CircleCollider(startpos, 30)
-        self.last_collision_point = Vector2(0, -1000)
+        self.Coll = CircleCollider(startpos, radius)
+        self.__last_collision_point = Vector2(0, -1000)
+
+        PlayerController.instance = self
     
-    def initialize_gravity(self):
+    def __initialize_gravity(self):
         max_jump_height = 300
         max_jump_time = 1.2
-        self.terminal_vel = 1500
+        self.__terminal_vel = 1500
 
         time_to_apex = max_jump_time / 2
-        self.gravity = 2 * max_jump_height / (time_to_apex**2)
-        self.jump_force = 2 * max_jump_height / time_to_apex
+        self.__gravity = 2 * max_jump_height / (time_to_apex**2)
+        self.__jump_force = 2 * max_jump_height / time_to_apex
 
     def update(self):
-        if (self.is_grounded):
-            self.jump_dir = self.surface_normal
-            self.move_dir = Vector2(-self.surface_normal.y, self.surface_normal.x)
-            self.surface_vel = Vector2(
-                Vector2.dot(self.move_dir, self.vel), Vector2.dot(self.jump_dir, self.vel))
-
-            self.read_input()
-            self.check_jump()
-            self.apply_horizontal_accel()
+        if (self.__is_grounded):
+            self.__grounded_update()
         else:
-            self.apply_gravity()
+            self.__midair_update()
 
-        self.move()
-        self.handle_collision()
+        self.__move()
+        self.__is_grounded = False
 
-    def read_input(self):
-        self.input = 0
+# - - - - Ground Update - - - -
+
+    def __grounded_update(self):
+        self.__surface_vel = Vector2(Vector2.dot(self.__move_axis, self.Vel), Vector2.dot(self.__jump_axis, self.Vel))
+
+        self.__read_input()
+        self.__apply_horizontal_accel()
+        self.__apply_friction()
+        self.__clamp_velocity()
+        self.__handle_jumping()
+
+        self.Vel = self.__surface_vel.x * self.__move_axis + self.__surface_vel.y * self.__jump_axis
+
+    def __read_input(self):
+        self.__input = 0
         keys = pygame.key.get_pressed()
 
         if (keys[pygame.K_a] or keys[pygame.K_LEFT]):
-            self.input -= 1
+            self.__input -= 1
         if (keys[pygame.K_d] or keys[pygame.K_RIGHT]):
-            self.input += 1
+            self.__input += 1
         
-        self.jump_pressed = keys[pygame.K_SPACE]
+        self.__jump_pressed = keys[pygame.K_SPACE]
 
-    def apply_gravity(self):
-        self.vel.y += self.gravity * Time.dt
-        self.vel.y = min(self.vel.y, self.terminal_vel)
-
-    def apply_horizontal_accel(self):
-        if (self.input == 0):
-            if (self.surface_vel.x == 0):
-                return
-            self.surface_vel.x -= math.copysign(1, self.surface_vel.x) * self.accel * Time.dt
-        else:
-            self.surface_vel.x += self.input * self.accel * Time.dt
-
-        self.surface_vel.x *= (1 - self.drag)
-
-        self.surface_vel.x = pygame.math.clamp(self.surface_vel.x, -self.speed, self.speed)
-        if (abs(self.surface_vel.x) < 5):
-            self.surface_vel.x = 0
-
-    def check_jump(self):
-        if (not self.jump_pressed and not self.can_jump):
-            self.can_jump = True
+    def __apply_horizontal_accel(self):
+        if (self.__input != 0):
+            self.__surface_vel.x += self.__input * self.__accel * Time.dt
+            return
         
-        if (self.is_grounded and self.jump_pressed and self.can_jump):
-            self.can_jump = False
-            self.surface_vel.y = self.jump_force * max(
-                (Vector2.dot(self.surface_normal, Vector2(0, -1)) + 1) / 2, 0.1)
+        if (self.__surface_vel.x == 0):
+            return
 
-    def move(self):
-        if (self.is_grounded):
-            self.vel = self.surface_vel.x * self.move_dir + self.surface_vel.y * self.jump_dir
+        self.__surface_vel.x -= math.copysign(1, self.__surface_vel.x) * self.__accel * Time.dt
+    
+    def __apply_friction(self):
+        self.__surface_vel.x *= (1 - self.__friction)
+    
+    def __clamp_velocity(self):
+        self.__surface_vel.x = pygame.math.clamp(self.__surface_vel.x, -self.__max_speed, self.__max_speed)
+        if (abs(self.__surface_vel.x) < 5):
+            self.__surface_vel.x = 0
+
+    def __handle_jumping(self):
+        if (not self.__jump_pressed and self.__is_grounded):
+            self.__can_jump = True
         
-        self.coll.pos += self.vel * Time.dt
+        if (self.__jump_pressed and self.__can_jump):
+            self.__can_jump = False
+            self.__surface_vel.y = self.__jump_force * self.__jump_force_multiplier()
 
-    # Does not take into consideration collision with multiple colliders at the same time
-    def handle_collision(self):
-        self.is_grounded = False
-        self.floor_collision()
+    def __jump_force_multiplier(self):
+        return max((Vector2.dot(self.__jump_axis, Vector2(0, -1)) + 1) / 2, 0.1)
 
-        for c in PlatformManager.circles:
-            info = CollisionHandler.circle_circle(self.coll, c)
-            if (info is None):
-                continue
-            self.collision_response(info)
-        
-        for p in PlatformManager.polys:
-            info = CollisionHandler.circle_polygon(self.coll, p)
-            if (info is None):
-                continue
-            self.collision_response(info)
+# - - - - Midair Update - - - -
+
+    def __midair_update(self):
+        self.__surface_vel = Vector2(0, 0)
+        self.__apply_gravity()
+
+    def __apply_gravity(self):
+        self.Vel.y += self.__gravity * Time.dt
+        self.Vel.y = min(self.Vel.y, self.__terminal_vel)
+
+# - - - - Others - - - -
+
+    def __move(self):
+        self.Coll.pos += self.Vel * Time.dt
 
     def collision_response(self, info: CollisionInfo):
-        self.coll.pos += info.normal * (info.overlap - skin_width)
-        self.last_collision_point = info.point
-        self.surface_normal = info.normal
+        self.Coll.pos += info.get_offset_in()
+        self.__last_collision_point = info.point
+
+        self.__jump_axis = info.normal
+        self.__move_axis = Vector2(-info.normal.y, info.normal.x)
 
         tangent = Vector2(-info.normal.y, info.normal.x)
-        self.vel = Vector2.dot(tangent, self.vel) * tangent
-        self.is_grounded = True
+        self.Vel = Vector2.dot(tangent, self.Vel) * tangent
+        self.__is_grounded = True
 
-    def floor_collision(self):
-        if (self.coll.pos.y + self.coll.radius > HEIGHT):
-            self.coll.pos.y = HEIGHT - self.coll.radius
-            self.surface_normal = Vector2(0, -1)
-            self.last_collision_point = Vector2(self.coll.pos.x, self.coll.pos.y + self.coll.radius)
-            self.vel.y = 0
-            self.is_grounded = True
-
-    def draw(self):
-        pygame.draw.circle(Stage.stage, (255, 0, 0), self.coll.pos, self.coll.radius)
-        pygame.draw.circle(Stage.stage, (0, 255, 0), self.last_collision_point, 5)
+    def draw(self, surf):
+        pygame.draw.circle(surf, (255, 0, 0), self.Coll.pos, self.Coll.R)
+        pygame.draw.circle(surf, (0, 255, 0), self.__last_collision_point, 5)
