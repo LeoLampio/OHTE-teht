@@ -1,7 +1,7 @@
 import math
-import pygame
 from pygame.math import Vector2
 from utils.time import Time
+from utils.stage import Stage
 from physics.colliders import Collider, CircleCollider, PolygonCollider
 from physics.collisionhandler import CollisionHandler
 from entities.player import PlayerController
@@ -24,11 +24,11 @@ class Platform:
         self.vel = new_vel
         self.is_static = self.vel == Vector2(0, 0)
 
-    def draw(self, surf):
+    def draw(self):
         if (isinstance(self.coll, CircleCollider)):
-            pygame.draw.circle(surf, self.__color, self.coll.pos, self.coll.radius)
+            Stage.draw_circle(self.coll.pos, self.coll.radius, self.__color)
         else:
-            pygame.draw.polygon(surf, self.__color, self.coll.vertices)
+            Stage.draw_polygon(self.coll.vertices, self.__color)
 
 # Generates and updates Platform objects
 
@@ -38,7 +38,9 @@ class PlatformManager:
     @classmethod
     def generate(cls):
         circle = CircleCollider(Vector2(600, 800), 100)
-        cls.current_platforms.append(Platform(True, circle, (255, 255, 255)))
+        p = Platform(False, circle, (255, 255, 255))
+        p.set_velocity(Vector2(0, -100))
+        cls.current_platforms.append(p)
 
         vs = []
         n = 7
@@ -71,6 +73,6 @@ class PlatformManager:
             PlayerController.instance.collision_response(info, c.vel * Time.dt)
 
     @classmethod
-    def draw(cls, surf):
+    def draw(cls):
         for c in cls.current_platforms:
-            c.draw(surf)
+            c.draw()

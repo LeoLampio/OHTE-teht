@@ -1,6 +1,7 @@
 import pygame
 from pygame.math import Vector2
 from utils.time import Time
+from utils.stage import Stage
 from physics.colliders import CircleCollider
 from physics.collisionhandler import CollisionInfo
 
@@ -153,6 +154,6 @@ class PlayerController:
         self.__is_grounded = True
 
     # Draw the player's collider on screen
-    def draw(self, surf):
-        pygame.draw.circle(surf, (255, 0, 0), self.coll.pos, self.coll.radius)
-        pygame.draw.circle(surf, (0, 255, 0), self.__last_collision_point, 5)
+    def draw(self):
+        Stage.draw_circle(self.coll.pos, self.coll.radius, (255, 0, 0))
+        Stage.draw_circle(self.__last_collision_point, 5, (0, 255, 0))

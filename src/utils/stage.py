@@ -1,24 +1,31 @@
 import pygame
 from pygame.surface import Surface
-from entities.player import PlayerController
-from entities.platforms import PlatformManager
+from pygame.math import Vector2
 
 # Handle Drawing & Window Properties
 
 class Stage:
     WIDTH = 0
     HEIGHT = 0
-    __offset = 0
+    Offset = Vector2(0, 0)
 
-    def __init__(self, surf: Surface):
-        self.__stage = surf
-        Stage.WIDTH = surf.get_width()
-        Stage.HEIGHT = surf.get_height()
+    __stage: Surface = None
+    __back_col = (20, 0, 30)
 
-    def draw(self):
-        self.__stage.fill((0, 0, 0))
+    @classmethod
+    def initialize(cls, surf: Surface):
+        cls.__stage = surf
+        cls.WIDTH = surf.get_width()
+        cls.HEIGHT = surf.get_height()
 
-        PlatformManager.draw(self.__stage)
-        PlayerController.instance.draw(self.__stage)
+    @classmethod
+    def draw_background(cls):
+        cls.__stage.fill(cls.__back_col)
 
-        pygame.display.flip()
+    @classmethod
+    def draw_circle(cls, pos: Vector2, radius: float, color: tuple):
+        pygame.draw.circle(cls.__stage, color, pos + cls.Offset, radius)
+
+    @classmethod
+    def draw_polygon(cls, vertices: list, color: tuple):
+        pygame.draw.polygon(cls.__stage, color, [v + cls.Offset for v in vertices])

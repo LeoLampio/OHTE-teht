@@ -11,3 +11,6 @@
 
 ## Week 5
 - massive refactoring
+**Added:**
+- a camera system
+- the ability for platforms to move

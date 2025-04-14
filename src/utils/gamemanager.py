@@ -1,8 +1,9 @@
 import sys
 import pygame
 from pygame.math import Vector2
-from utils.stage import Stage
 from utils.time import Time
+from utils.stage import Stage
+from utils.camera import Camera
 from entities.platforms import PlatformManager
 from entities.player import PlayerController
 
@@ -13,8 +14,10 @@ class GameManager:
         pygame.init()
 
         pygame.display.set_caption("Hello World!")
-        self.window = Stage(pygame.display.set_mode((1200, 1000)))
+        Stage.initialize(pygame.display.set_mode((1200, 1000)))
         self.clock = pygame.time.Clock()
+
+        self.cam = Camera()
 
         self.player = PlayerController(Vector2(600, 500), 30)
         PlatformManager.generate()
@@ -32,12 +35,24 @@ class GameManager:
             
             self.player.update()
             PlatformManager.update()
+            self.cam.update()
 
-            self.window.draw()
+            self.update_screen()
             self.clock.tick(60)
+    
+    def update_screen(self):
+        Stage.draw_background()
+
+        PlatformManager.draw()
+        PlayerController.instance.draw()
+
+        pygame.display.flip()
 
     # Press ESC to exit the game
     def check_events(self):
+        if (self.cam.is_out_of_frustum()):
+            self.on_exit()
+
         for event in pygame.event.get():
             if (event.type == pygame.KEYDOWN):
                 if (event.key == pygame.K_ESCAPE):
