@@ -1,5 +1,5 @@
 **GENERAL**  
 main -> GameManager (takes care of updating game states)
 
-**GAME OBJECTS**
+**GAME OBJECTS**  
 entities <-> colliders
