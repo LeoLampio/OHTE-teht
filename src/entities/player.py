@@ -34,6 +34,7 @@ class PlayerController:
         # collision variables
         self.coll = CircleCollider(startpos, radius)
         self.__last_collision_point = Vector2(0, -1000)
+        self.__collision_buffer: list[CollisionInfo] = []
 
         # singleton
         PlayerController.instance = self
@@ -117,7 +118,12 @@ class PlayerController:
     # The jump_force (initial y-velocity) is not constant
     # The more the player jumps in the direction of gravity, the less force is applied
     def __jump_force_multiplier(self):
-        return max((Vector2.dot(self.__jump_axis, Vector2(0, -1)) + 1) / 2, 0.1)
+        # difference is a number in range [-1, 1]
+        difference = Vector2.dot(self.__jump_axis, Vector2(0, -1))
+        # [-1, 1] -> [0, 1]
+        difference = (difference + 1) / 2
+        # the multiplier should be non zero
+        return max(difference, 0.1)
 
 # - - - - Midair Update - - - -
 
@@ -138,10 +144,29 @@ class PlayerController:
     def __move(self):
         self.coll.pos += self.vel * Time.dt
 
+    # Add per update cycle data to the collision buffer
+    def add_to_buffer(self, data: CollisionInfo):
+        self.__collision_buffer.append(data)
+
     # Respond to collisions with surfaces (platforms)
-    def collision_response(self, info: CollisionInfo, inherited_offset: Vector2 = Vector2(0, 0)):
+    def collision_response(self):
+        # no collisions
+        if (len(self.__collision_buffer) == 0):
+            return
+
+        # find the most 'relevant' collision
+        diff = Vector2.dot(self.vel, self.__collision_buffer[0].normal)
+        index = 0
+        for i in range(1, len(self.__collision_buffer)):
+            other = Vector2.dot(self.vel, self.__collision_buffer[i].normal)
+            if (other < diff):
+                diff = other
+                index = i
+
+        info = self.__collision_buffer[index]
+
         # resolve collision (technically not); make the player stick to the collider
-        self.coll.pos += info.get_offset_in() + inherited_offset
+        self.coll.pos += info.get_offset_in() + info.inherited_offset
 
         # change basis
         self.__jump_axis = info.normal
@@ -152,6 +177,9 @@ class PlayerController:
 
         self.__last_collision_point = info.point
         self.__is_grounded = True
+
+        # reset buffer
+        self.__collision_buffer.clear()
 
     # Draw the player's collider on screen
     def draw(self):

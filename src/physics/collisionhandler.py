@@ -9,6 +9,7 @@ class CollisionInfo:
         self.normal = normal
         self.overlap = overlap
         self.point = point
+        self.inherited_offset = Vector2(0, 0)
 
     # Resolve collision fully
     def get_offset_out(self):

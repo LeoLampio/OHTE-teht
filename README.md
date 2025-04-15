@@ -1,6 +1,6 @@
 # Physics Based Platformer
 
-#### Climb to your hearts content. Only the sky's the limit!
+#### Climb to your heart's content. Only the sky's the limit!
 #### Just don't fall...
 
 ## Support

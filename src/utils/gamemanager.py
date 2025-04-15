@@ -37,6 +37,7 @@ class GameManager:
             
             self.player.update()
             PlatformManager.update()
+            self.player.collision_response()
             self.cam.update()
 
             self.update_screen()

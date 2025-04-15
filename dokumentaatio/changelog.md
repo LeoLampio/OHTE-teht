@@ -11,7 +11,9 @@
 
 ## Week 5
 - massive refactoring
+
 **Added:**
 - a camera system
 - the ability for platforms to move
-- very basic platform generation
+- basic platform generation
+- the player now supports collision with multiple platforms
