@@ -51,6 +51,8 @@ class PlatformManager:
 
     @classmethod
     def generate(cls):
+        cls.destroy()
+
         if (not cls.__can_generate()):
             return
         
@@ -62,7 +64,7 @@ class PlatformManager:
             cls.__create_polygon()
         
         cls.__prev_pos.x = cls.current_platforms[-1].coll.pos.x
-        cls.__set_values()
+        cls.__set_values()        
 
     @classmethod
     def destroy(cls):
