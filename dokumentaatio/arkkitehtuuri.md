@@ -12,5 +12,4 @@ Stage
 1. update Time
 2. check if exit
 3. update entities
-4. update camera
 5. update screen

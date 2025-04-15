@@ -1,187 +1,27 @@
-import pygame
 from pygame.math import Vector2
-from utils.time import Time
-from utils.stage import Stage
+from entities.entity import Entity
+from physics.player_control import PlayerController
 from physics.colliders import CircleCollider
-from physics.collisionhandler import CollisionInfo
+from utils.stage import Stage
+from utils.time import Time
+from utils.camera import Camera
 
-# Handles player movement and response to physics
+# Player entity
 
-class PlayerController:
-    instance: "PlayerController" = None
+class Player(Entity):
+    instance: 'Player' = None
 
-    def __init__(self, startpos: Vector2, radius: float):
-        # state variables
-        self.__input = 0
-        self.__jump_pressed = False
-        self.__is_grounded = False
-        self.__can_jump = False
+    def __init__(self, start_pos: Vector2, radius: float):
+        super().__init__(CircleCollider(start_pos, radius), (255, 0, 0))
+        self.controller = PlayerController(self)
+        self.camera = Camera(self)
 
-        # movement variables
-        self.__max_speed = 300
-        self.__accel = self.__max_speed / 0.15
-        self.__friction = 1 / 10
-        self.__initialize_gravity()
+        Player.instance = self
 
-        # surface basis vectors
-        self.__jump_axis = Vector2(0, -1)
-        self.__move_axis = Vector2(1, 0)
-
-        # vel (world space), surface_vel (surface space)
-        self.vel = Vector2(0, 0)
-        self.__surface_vel = Vector2(0, 0)
-
-        # collision variables
-        self.coll = CircleCollider(startpos, radius)
-        self.__last_collision_point = Vector2(0, -1000)
-        self.__collision_buffer: list[CollisionInfo] = []
-
-        # singleton
-        PlayerController.instance = self
-    
-    # Compute required gravity & jump_force using parabola math
-    def __initialize_gravity(self):
-        max_jump_height = 300
-        max_jump_time = 1.2
-        self.__terminal_vel = 1500
-
-        time_to_apex = max_jump_time / 2
-        self.__gravity = 2 * max_jump_height / (time_to_apex**2)
-        self.__jump_force = 2 * max_jump_height / time_to_apex
-    
-    # Player loop
     def update(self):
-        if (self.__is_grounded):
-            self.__grounded_update()
-        else:
-            self.__midair_update()
+        self.controller.update()
+        self.translate(self.controller.vel * Time.dt)
 
-        self.__move()
-        self.__is_grounded = False
-
-# - - - - Ground Update - - - -
-
-    def __grounded_update(self):
-        # transformation from world to surface space
-        self.__surface_vel = Vector2(Vector2.dot(self.__move_axis, self.vel), Vector2.dot(self.__jump_axis, self.vel))
-
-        self.__read_input()
-        self.__apply_horizontal_accel()
-        self.__apply_friction()
-        self.__clamp_velocity()
-        self.__handle_jumping()
-        
-        # transformation from surface to world space
-        self.vel = self.__surface_vel.x * self.__move_axis + self.__surface_vel.y * self.__jump_axis
-
-    # Horizontal input: arrow keys, A and D
-    # Jump: space
-    def __read_input(self):
-        self.__input = 0
-        keys = pygame.key.get_pressed()
-
-        if (keys[pygame.K_a] or keys[pygame.K_LEFT]):
-            self.__input -= 1
-        if (keys[pygame.K_d] or keys[pygame.K_RIGHT]):
-            self.__input += 1
-        
-        self.__jump_pressed = keys[pygame.K_SPACE]
-
-    # Accelerate when input exists
-    def __apply_horizontal_accel(self):
-        if (self.__input == 0):
-            return
-        self.__surface_vel.x += self.__input * self.__accel * Time.dt
-    
-    # Decelerate the player
-    def __apply_friction(self):
-        self.__surface_vel.x *= (1 - self.__friction)
-    
-    def __clamp_velocity(self):
-        # the speed of the player should not exceed max_speed
-        self.__surface_vel.x = pygame.math.clamp(self.__surface_vel.x, -self.__max_speed, self.__max_speed)
-
-        # if the speed is very small => default to zero
-        if (abs(self.__surface_vel.x) < 5):
-            self.__surface_vel.x = 0
-
-    # The player may only jump if grounded when the space bar is pressed
-    # The can_jump variable prevents the player from jumping multiple times with the same space bar press
-    def __handle_jumping(self):
-        if (not self.__jump_pressed and self.__is_grounded):
-            self.__can_jump = True
-        
-        if (self.__jump_pressed and self.__can_jump):
-            self.__can_jump = False
-            self.__surface_vel.y = self.__jump_force * self.__jump_force_multiplier()
-
-    # The jump_force (initial y-velocity) is not constant
-    # The more the player jumps in the direction of gravity, the less force is applied
-    def __jump_force_multiplier(self):
-        # difference is a number in range [-1, 1]
-        difference = Vector2.dot(self.__jump_axis, Vector2(0, -1))
-        # [-1, 1] -> [0, 1]
-        difference = (difference + 1) / 2
-        # the multiplier should be non zero
-        return max(difference, 0.1)
-
-# - - - - Midair Update - - - -
-
-    def __midair_update(self):
-        # reset surface_vel since player is airborne
-        self.__surface_vel = Vector2(0, 0)
-        self.__apply_gravity()
-
-    def __apply_gravity(self):
-        # apply downwards acceleration always in the direction of the positive y-axis
-        self.vel.y += self.__gravity * Time.dt
-        # make sure the player doesn't accelerate too much
-        self.vel.y = min(self.vel.y, self.__terminal_vel)
-
-# - - - - Other Methods - - - -
-
-    # Move the player in world space
-    def __move(self):
-        self.coll.pos += self.vel * Time.dt
-
-    # Add per update cycle data to the collision buffer
-    def add_to_buffer(self, data: CollisionInfo):
-        self.__collision_buffer.append(data)
-
-    # Respond to collisions with surfaces (platforms)
-    def collision_response(self):
-        # no collisions
-        if (len(self.__collision_buffer) == 0):
-            return
-
-        # find the most 'relevant' collision
-        diff = Vector2.dot(self.vel, self.__collision_buffer[0].normal)
-        index = 0
-        for i in range(1, len(self.__collision_buffer)):
-            other = Vector2.dot(self.vel, self.__collision_buffer[i].normal)
-            if (other < diff):
-                diff = other
-                index = i
-
-        info = self.__collision_buffer[index]
-
-        # resolve collision (technically not); make the player stick to the collider
-        self.coll.pos += info.get_offset_in() + info.inherited_offset
-
-        # change basis
-        self.__jump_axis = info.normal
-        self.__move_axis = Vector2(-info.normal.y, info.normal.x)
-
-        # remove all vertical velocity upon collision with a surface
-        self.vel = Vector2.dot(self.vel, self.__move_axis) * self.__move_axis
-
-        self.__last_collision_point = info.point
-        self.__is_grounded = True
-
-        # reset buffer
-        self.__collision_buffer.clear()
-
-    # Draw the player's collider on screen
     def draw(self):
-        Stage.draw_circle(self.coll.pos, self.coll.radius, (255, 0, 0))
-        Stage.draw_circle(self.__last_collision_point, 5, (0, 255, 0))
+        super().draw()
+        Stage.draw_circle(self.controller.last_collision_point, 5, (0, 255, 0))

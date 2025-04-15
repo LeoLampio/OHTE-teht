@@ -3,9 +3,8 @@ import pygame
 from pygame.math import Vector2
 from utils.time import Time
 from utils.stage import Stage
-from utils.camera import Camera
-from entities.platforms import PlatformManager
-from entities.player import PlayerController
+from utils.platform_manager import PlatformManager
+from entities.player import Player
 
 # Manages Game States & Updating
 
@@ -17,9 +16,8 @@ class GameManager:
         Stage.initialize(pygame.display.set_mode((1200, 1000)))
 
         self.clock = pygame.time.Clock()
-        self.cam = Camera()
 
-        self.player = PlayerController(Vector2(600, 600), 30)
+        self.player = Player(Vector2(600, 600), 30)
         PlatformManager.begin()
 
         self.load_content()
@@ -37,8 +35,9 @@ class GameManager:
             
             self.player.update()
             PlatformManager.update()
-            self.player.collision_response()
-            self.cam.update()
+            self.player.controller.collision_response()
+            self.player.camera.update()
+            PlatformManager.generate()
 
             self.update_screen()
             self.clock.tick(60)
@@ -47,14 +46,14 @@ class GameManager:
     def update_screen(self):
         Stage.draw_background()
 
-        PlatformManager.draw()
-        PlayerController.instance.draw()
+        PlatformManager.render()
+        self.player.draw()
 
         pygame.display.flip()
 
     # Press ESC to exit the game (or fall offscreen)
     def check_events(self):
-        if (self.cam.is_out_of_frustum()):
+        if (self.player.camera.is_out_of_frustum()):
             self.on_exit()
 
         for event in pygame.event.get():

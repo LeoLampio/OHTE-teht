@@ -8,3 +8,4 @@
 |  | 1 h | improved drawing and added a camera |
 | 15.4 | 1.5 h | added some platform generation |
 |  | 1.5 h | better generation & physics |
+|  | 1 h | improved modularity |

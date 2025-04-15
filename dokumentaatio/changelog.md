@@ -17,3 +17,4 @@
 - the ability for platforms to move
 - basic platform generation
 - the player now supports collision with multiple platforms
+- a kind of entity component system

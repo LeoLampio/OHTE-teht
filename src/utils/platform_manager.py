@@ -3,33 +3,10 @@ import random
 from pygame.math import Vector2, clamp
 from utils.time import Time
 from utils.stage import Stage
-from physics.colliders import Collider, CircleCollider, PolygonCollider
+from physics.colliders import CircleCollider, PolygonCollider
 from physics.collisionhandler import CollisionHandler
-from entities.player import PlayerController
-
-# Represents a platform object, which can be static or have a constant, unchanging velocity
-# Platforms are kinematic and thus only interact with the player
-
-class Platform:
-    def __init__(self, static: bool, collider: Collider, color: tuple):
-        self.is_static = static
-        self.vel = Vector2(0, 0)
-
-        self.coll = collider
-        self.__color = color
-    
-    def move(self):
-        self.coll.pos += self.vel * Time.dt
-
-    def set_velocity(self, new_vel: Vector2):
-        self.vel = new_vel
-        self.is_static = self.vel == Vector2(0, 0)
-
-    def draw(self):
-        if (isinstance(self.coll, CircleCollider)):
-            Stage.draw_circle(self.coll.pos, self.coll.radius, self.__color)
-        else:
-            Stage.draw_polygon(self.coll.vertices, self.__color)
+from entities.player import Player
+from entities.platform import Platform
 
 # Generates and updates Platform objects
 
@@ -119,19 +96,19 @@ class PlatformManager:
     # Check player collision against a non moving platform
     @classmethod
     def __static_check(cls, c: Platform):
-        info = CollisionHandler.circle_collision(PlayerController.instance.coll, c.coll)
+        info = CollisionHandler.circle_collision(Player.instance.coll, c.coll)
         if (info is not None):
-            PlayerController.instance.add_to_buffer(info)
+            Player.instance.controller.add_to_buffer(info)
 
     # Check player collision against a moving platform
     @classmethod
     def __dynamic_check(cls, c: Platform):
-        info = CollisionHandler.circle_collision(PlayerController.instance.coll, c.coll)
+        info = CollisionHandler.circle_collision(Player.instance.coll, c.coll)
         if (info is not None):
             info.inherited_offset = c.vel * Time.dt
-            PlayerController.instance.add_to_buffer(info)
+            Player.instance.controller.add_to_buffer(info)
 
     @classmethod
-    def draw(cls):
+    def render(cls):
         for c in cls.current_platforms:
             c.draw()

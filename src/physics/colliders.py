@@ -1,5 +1,6 @@
 from pygame.math import Vector2
 from pygame.rect import Rect
+from utils.stage import Stage
 
 # Base type for all colliders
 
@@ -20,6 +21,9 @@ class Collider:
     def overlap(cls, bounds1: Rect, bounds2: Rect) -> bool:
         return bounds1.right > bounds2.left and bounds1.bottom > bounds2.top \
                and bounds1.left < bounds2.right and bounds1.top < bounds2.bottom
+    
+    def draw_coll(self, color: tuple):
+        pass
 
 # A radial collider around a given position
 
@@ -36,6 +40,9 @@ class CircleCollider(Collider):
     @property
     def radius_squared(self):
         return self.__r2
+    
+    def draw_coll(self, color):
+        Stage.draw_circle(self.pos, self.radius, color)
 
 # A convex polygon collider defined by a set of vertices
 
@@ -114,3 +121,6 @@ class PolygonCollider(Collider):
         for v in self.__vertices:
             _sum += v
         self.__centroid = _sum / self.__vert_count
+
+    def draw_coll(self, color):
+        Stage.draw_polygon(self.vertices, color)
