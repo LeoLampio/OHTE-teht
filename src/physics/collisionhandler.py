@@ -21,6 +21,7 @@ class CollisionInfo:
 # A helper class to compute collisions
 
 class CollisionHandler:
+    # A general method for handling collisions where circ is the colliding object (ie. the player)
     @classmethod
     def circle_collision(cls, circ: CircleCollider, other: Collider) -> CollisionInfo:
         if (isinstance(other, CircleCollider)):
@@ -29,9 +30,11 @@ class CollisionHandler:
 
     @classmethod
     def circle_circle(cls, c1: CircleCollider, c2: CircleCollider) -> CollisionInfo:
+        # broad phase
         if (not Collider.overlap(c1.bounds, c2.bounds)):
             return None
 
+        # circles are overlapping when the distance between their centers is less than the sum of their radii
         d2 = Vector2.length_squared(c1.pos - c2.pos)
         radii = c1.radius + c2.radius
 
@@ -53,7 +56,7 @@ class CollisionHandler:
         if (cls.point_in_polygon(p, c.pos)):
             return None # Unimplemented
 
-        # Go over edges
+        # go over edges
         for i in range(p.degree):
             v0 = p.vertices[i]
             v1 = p.vertices[(i + 1) % p.degree]
@@ -63,7 +66,7 @@ class CollisionHandler:
                 continue
             return CollisionInfo(n, c.radius - l, c.pos - n * l)
         
-        # Go over vertices
+        # go over vertices
         for v in p.vertices:
             if (cls.point_in_circle(c, v)):
                 return CollisionInfo(Vector2.normalize(c.pos - v), c.radius - Vector2.length(c.pos - v), v)
@@ -71,6 +74,7 @@ class CollisionHandler:
         # no collision
         return None
 
+    # Does a given point v lie within the polygon collider p
     @classmethod
     def point_in_polygon(cls, p: PolygonCollider, v: Vector2) -> bool:
         for i in range(p.degree):
@@ -78,15 +82,22 @@ class CollisionHandler:
                 return False
         return True
 
+    # Does a given point v lie within the circle collider c
     @classmethod
     def point_in_circle(cls, c: CircleCollider, v: Vector2) -> bool:
         return Vector2.length_squared(v - c.pos) < c.radius_squared
     
+    # The shortest distance between a point v and a line segment defined by points p0 and p1
     @classmethod
     def point_line_segment_dist(cls, p0: Vector2, p1: Vector2, v: Vector2) -> float:
         p01 = p1 - p0
+        # inverse lerp
         t = Vector2.dot(p01, v - p0) / Vector2.length_squared(p01)
+
+        # the point is 'off' the line segment
         if (t < 0 or t > 1):
             return -1
+        
+        # regular lerp to get the closest point
         line_point = p0 * (1 - t) + p1 * t
         return Vector2.length(v - line_point)

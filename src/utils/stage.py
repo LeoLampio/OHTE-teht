@@ -1,6 +1,6 @@
 import pygame
-from pygame.surface import Surface
 from pygame.math import Vector2
+from pygame.surface import Surface
 
 # Handle Drawing & Window Properties
 

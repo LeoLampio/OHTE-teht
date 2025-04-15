@@ -15,19 +15,21 @@ class GameManager:
 
         pygame.display.set_caption("Hello World!")
         Stage.initialize(pygame.display.set_mode((1200, 1000)))
-        self.clock = pygame.time.Clock()
 
+        self.clock = pygame.time.Clock()
         self.cam = Camera()
 
-        self.player = PlayerController(Vector2(600, 500), 30)
-        PlatformManager.generate()
+        self.player = PlayerController(Vector2(600, 600), 30)
+        PlatformManager.begin()
 
         self.load_content()
 
     # Load assets
     def load_content(self):
+        # currently no assets
         self.update()
 
+    # Update game state
     def update(self):
         while (True):
             Time.update(self.clock)
@@ -40,6 +42,7 @@ class GameManager:
             self.update_screen()
             self.clock.tick(60)
     
+    # Rendering phase of the update cycle
     def update_screen(self):
         Stage.draw_background()
 
@@ -48,7 +51,7 @@ class GameManager:
 
         pygame.display.flip()
 
-    # Press ESC to exit the game
+    # Press ESC to exit the game (or fall offscreen)
     def check_events(self):
         if (self.cam.is_out_of_frustum()):
             self.on_exit()

@@ -1,4 +1,5 @@
 import math
+import random
 from pygame.math import Vector2
 from utils.time import Time
 from utils.stage import Stage
@@ -34,19 +35,51 @@ class Platform:
 
 class PlatformManager:
     current_platforms: list[Platform] = []
+    __platform_dist = 350
+    __last_y = 0
+    __max_rad = 100
+
+    @classmethod
+    def begin(cls):
+        cls.__last_y = Stage.HEIGHT * 0.8
+        circle = CircleCollider(Vector2(Stage.WIDTH / 2, cls.__last_y), 100)
+        start_platform = Platform(True, circle, (0, 200, 100))
+        cls.current_platforms.append(start_platform)
+
+        while (cls.__last_y + cls.__max_rad >= cls.__platform_dist):
+            cls.generate()
 
     @classmethod
     def generate(cls):
-        circle = CircleCollider(Vector2(600, 800), 100)
-        p = Platform(False, circle, (255, 255, 255))
-        p.set_velocity(Vector2(0, -100))
-        cls.current_platforms.append(p)
+        if (cls.__last_y + Stage.Offset.y + cls.__max_rad < cls.__platform_dist):
+            return
+        
+        cls.__last_y -= cls.__platform_dist
+        if (random.random() < 0.5):
+            cls.__create_circle()
+        else:
+            cls.__create_polygon()
 
+    @classmethod
+    def destroy(cls):
+        if (cls.current_platforms[0].coll.pos.y + Stage.Offset.y > Stage.HEIGHT + cls.__max_rad):
+            cls.current_platforms.pop(0)
+
+    @classmethod
+    def __create_circle(cls):
+        pos = Vector2(random.randint(cls.__max_rad, Stage.WIDTH - cls.__max_rad), cls.__last_y)
+        circle = CircleCollider(pos, cls.__max_rad)
+        cls.current_platforms.append(Platform(True, circle, (255, 255, 255)))
+
+    @classmethod
+    def __create_polygon(cls):
         vs = []
-        n = 7
+        n = random.randint(3, 8)
         for i in range(n):
-            vs.append(Vector2(math.cos(math.pi * 2 / n * i), math.sin(math.pi * 2 / n * i)) * 100)
-        poly = PolygonCollider(Vector2(200, 600), vs)
+            v_norm = Vector2(math.cos(math.pi * 2 / n * i), math.sin(math.pi * 2 / n * i))
+            vs.append(v_norm * cls.__max_rad)
+        pos = Vector2(random.randint(cls.__max_rad, Stage.WIDTH - cls.__max_rad), cls.__last_y)
+        poly = PolygonCollider(pos, vs)
         cls.current_platforms.append(Platform(True, poly, (255, 255, 255)))
 
     @classmethod

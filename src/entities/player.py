@@ -38,6 +38,7 @@ class PlayerController:
         # singleton
         PlayerController.instance = self
     
+    # Compute required gravity & jump_force using parabola math
     def __initialize_gravity(self):
         max_jump_height = 300
         max_jump_time = 1.2
@@ -85,11 +86,10 @@ class PlayerController:
         
         self.__jump_pressed = keys[pygame.K_SPACE]
 
+    # Accelerate when input exists
     def __apply_horizontal_accel(self):
         if (self.__input == 0):
             return
-        
-        # accelerate when input exists
         self.__surface_vel.x += self.__input * self.__accel * Time.dt
     
     # Decelerate the player

@@ -26,13 +26,13 @@ class Collider:
 class CircleCollider(Collider):
     def __init__(self, pos, radius):
         super().__init__(pos)
-        self.__radius = max(1, radius)
-        self.__r2 = self.__radius**2
-        self._bounds = Rect(-self.__radius, -self.__radius, self.__radius * 2, self.__radius * 2)
+        self.__r = max(1, radius)
+        self.__r2 = self.__r**2
+        self._bounds = Rect(-self.__r, -self.__r, self.__r * 2, self.__r * 2)
     
     @property
     def radius(self):
-        return self.__radius
+        return self.__r
     @property
     def radius_squared(self):
         return self.__r2

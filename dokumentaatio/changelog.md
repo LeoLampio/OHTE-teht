@@ -14,3 +14,4 @@
 **Added:**
 - a camera system
 - the ability for platforms to move
+- very basic platform generation
