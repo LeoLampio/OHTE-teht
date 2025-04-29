@@ -19,8 +19,32 @@ class Stage:
         cls.HEIGHT = surf.get_height()
 
     @classmethod
+    def left(cls):
+        return -int(Stage.Offset.x)
+    
+    @classmethod
+    def right(cls):
+        return int(cls.WIDTH - Stage.Offset.x)
+    
+    @classmethod
+    def top(cls):
+        return -int(Stage.Offset.y)
+    
+    @classmethod
+    def bottom(cls):
+        return int(Stage.HEIGHT - Stage.Offset.y)
+
+    @classmethod
+    def draw_ui_element(cls, surf: Surface, pos: tuple):
+        cls.__stage.blit(surf, pos)
+
+    @classmethod
     def draw_background(cls):
         cls.__stage.fill(cls.__back_col)
+
+    @classmethod
+    def draw_custom_background(cls, bg: tuple):
+        cls.__stage.fill(bg)
 
     @classmethod
     def draw_circle(cls, pos: Vector2, radius: float, color: tuple):

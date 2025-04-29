@@ -2,9 +2,9 @@ from pygame.math import Vector2
 from entities.entity import Entity
 from physics.player_control import PlayerController
 from physics.colliders import CircleCollider
-from utils.stage import Stage
-from utils.time import Time
-from utils.camera import Camera
+from utils.gui.stage import Stage
+from utils.data.time import Time
+from utils.gui.camera import Camera
 
 # Player entity
 

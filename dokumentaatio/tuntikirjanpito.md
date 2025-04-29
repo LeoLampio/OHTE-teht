@@ -9,3 +9,4 @@
 | 15.4 | 1.5 h | added some platform generation |
 |  | 1.5 h | better generation & physics |
 |  | 1 h | improved modularity |
+| 29.4 | 6 h | added UI and better platform generation |

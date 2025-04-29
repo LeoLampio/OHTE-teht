@@ -6,11 +6,15 @@ The application is a game in which the player tries to parkour their way up with
 ## Currently Planned Features
 - [**DONE**] The player character has the ability to stick to surfaces
 - [**DONE**] While midair, the player cannot control the character, who retains its directional velocity
-- [**DONE ish**] The 'platforms' are generated procedurally
+- [**DONE**] The 'platforms' are generated procedurally
 - [**DONE**] As the player climbs higher the camera moves up (never down)
 - [**DONE**] If the player falls below the screen, the game ends
-- The distance climbed functions as the score, which could be stored in a file
+- [**DONE**] The distance climbed functions as the score
+- Store high score in a file
 
 ## Further Features
-- [**DONE ish**] Moving platforms
-- 
+- [**DONE**] Moving platforms
+- [**DONE**] UI
+
+- Player collision response still requires more work
+- The player should also die if being squished between two platforms

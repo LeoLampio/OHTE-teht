@@ -1,6 +1,6 @@
 import pygame
 from pygame.math import Vector2
-from utils.time import Time
+from utils.data.time import Time
 from physics.collisionhandler import CollisionInfo
 from entities.entity import Entity
 

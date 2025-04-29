@@ -1,6 +1,6 @@
 from pygame.math import Vector2
 from pygame.rect import Rect
-from utils.stage import Stage
+from utils.gui.stage import Stage
 
 # Base type for all colliders
 

@@ -1,6 +1,6 @@
 from pygame.math import lerp
-from utils.stage import Stage
-from utils.time import Time
+from utils.gui.stage import Stage
+from utils.data.time import Time
 from entities.entity import Entity
 
 # Controls the movement of the screen
@@ -12,7 +12,7 @@ class Camera:
         self.lerp_speed = 10
         # if the player is above this y-value, the screen should move
         self.boundary = 300
-        self.death_plane = 200
+        self.death_plane = 100
     
     def update(self):
         pos = self.entity.coll.pos + Stage.Offset

@@ -18,3 +18,9 @@
 - basic platform generation
 - the player now supports collision with multiple platforms
 - a kind of entity component system
+
+## Week 6
+**Added:**
+- UI
+- pausing, gameover, restarting
+- better platform generation with static & dynamic platforms
