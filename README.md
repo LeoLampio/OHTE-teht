@@ -13,7 +13,8 @@ Tested on a Cubbli machine with Python 3.10.
 [Architecture](https://github.com/LeoLampio/OHTE-teht/blob/main/dokumentaatio/arkkitehtuuri.md)
 
 ## Releases
-[Week 5](https://github.com/LeoLampio/OHTE-teht/releases/tag/Week5)
+[Week 5](https://github.com/LeoLampio/OHTE-teht/releases/tag/Week5)\
+[Week 6](https://github.com/LeoLampio/OHTE-teht/releases/tag/Week6)
 
 ## Install Dependencies
 ```poetry install```
