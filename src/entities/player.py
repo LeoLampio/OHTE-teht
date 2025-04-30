@@ -24,4 +24,5 @@ class Player(Entity):
 
     def draw(self):
         super().draw()
-        Stage.draw_circle(self.controller.last_collision_point, 5, (0, 255, 0))
+        if (self.controller.collision_point is not None):
+            Stage.draw_circle(self.controller.collision_point, 5, (0, 255, 0))

@@ -9,7 +9,7 @@ class Collider:
 
     def __init__(self, pos: Vector2):
         self.pos = pos
-        self._bounds = None
+        self._bounds : Rect = None
     
     # Slightly larger than the actual bounds because it helps the player stick to colliders
     @property

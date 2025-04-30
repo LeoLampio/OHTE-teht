@@ -2,7 +2,7 @@ import math
 import random
 from pygame.math import Vector2
 from utils.data.time import Time
-from utils.gui.stage import Stage
+from utils.gui.camera import Camera
 from physics.colliders import CircleCollider, PolygonCollider
 from physics.collisionhandler import CollisionHandler
 from entities.player import Player
@@ -13,18 +13,12 @@ from entities.platform import Platform
 class PlatformManager:
     current_platforms: list[Platform] = []
 
-    # Static platforms occasionally
-        # Distance between them increases the higher the player climbs
-    # Mostly dynamic platforms
-        # Sideways movement
-        # Spawn either left or right, move to the other side and get destroyed
-
     # Static Platform Variables
-    dist_to_next = 200
-    next_y = 0
+    static_dist = 200
+    next_static_bottom = 0
 
     # Dynamic Platform Variables
-    spawn_delay = 3
+    spawn_delay = 2.5
     spawn_timer = 0
 
     start_platform_color = (0, 200, 100)
@@ -35,11 +29,11 @@ class PlatformManager:
 
     @classmethod
     def begin(cls):
-        start_platform_coll = CircleCollider(Vector2(Stage.WIDTH / 2, Stage.bottom() - 150), 100)
+        start_platform_coll = CircleCollider(Vector2(Camera.horizontal_center(), Camera.bottom() - 150), 100)
         start_platform = Platform(True, start_platform_coll, cls.start_platform_color)
         cls.current_platforms.append(start_platform)
 
-        cls.next_y = start_platform_coll.bounds.top - cls.dist_to_next
+        cls.next_static_bottom = start_platform_coll.bounds.top - cls.static_dist
 
     @classmethod
     def update(cls):
@@ -49,7 +43,7 @@ class PlatformManager:
 
     @classmethod
     def reset(cls):
-        cls.dist_to_next = 200
+        cls.static_dist = 200
         cls.spawn_timer = 0
         cls.current_platforms.clear()
 
@@ -62,7 +56,7 @@ class PlatformManager:
 
     @classmethod
     def __spawn_next_static(cls) -> bool:
-        return Stage.top() < cls.next_y
+        return Camera.top() < cls.next_static_bottom
     
     @classmethod
     def __spawn_next_dynamic(cls) -> bool:
@@ -70,7 +64,7 @@ class PlatformManager:
     
     @classmethod
     def __increase_difficulty(cls):
-        cls.dist_to_next += 100
+        cls.static_dist += 100
 
     @classmethod
     def __generate(cls):
@@ -85,58 +79,50 @@ class PlatformManager:
     
     @classmethod
     def __create_static(cls):
+        size = random.randint(25, 150)
+
         if (random.random() < 0.5):
-            r = random.randint(25, 150)
-            x = random.randint(r, Stage.WIDTH - r)
-            coll = CircleCollider(Vector2(x, cls.next_y - r), r)
+            x = random.randint(size, Camera.right() - size)
+            y = cls.next_static_bottom - size
+            coll = CircleCollider(Vector2(x, y), size)
         else:
-            vs = []
+            verts = []
             n = random.randint(3, 8)
-            size = random.randint(25, 150)
             offset_angle = random.random() * math.pi / 2
             for i in range(n):
                 angle = math.pi * 2 / n * i + offset_angle
                 v_norm = Vector2(math.cos(angle), math.sin(angle))
-                vs.append(v_norm * size)
-            coll = PolygonCollider(Vector2(0, 0), vs)
-            x = random.randint(-coll.bounds.left, Stage.WIDTH - coll.bounds.right)
-            coll.pos = Vector2(x, cls.next_y - coll.bounds.bottom)
+                verts.append(v_norm * size)
+            coll = PolygonCollider(Vector2(0, 0), verts)
+            x = random.randint(-coll.bounds.left, Camera.right() - coll.bounds.right)
+            y = cls.next_static_bottom - coll.bounds.bottom
+            coll.pos = Vector2(x, y)
         
         platform = Platform(True, coll, cls.static_platform_color)
         cls.current_platforms.append(platform)
-        cls.next_y = coll.bounds.top - cls.dist_to_next
+        cls.next_static_bottom = coll.bounds.top - cls.static_dist
 
     @classmethod
     def __create_dynamic(cls):
-        x_vel = random.randint(25, 150)
+        left_side = random.random() < 0.5
+        size = random.randint(25, 150)
+        x_vel = random.randint(50, 200) * (1 if left_side else -1)
 
         if (random.random() < 0.5):
-            r = random.randint(25, 150)
-            y = random.randint(Stage.top() + r, Stage.bottom() - r)
-            x = 0
-            if (random.random() < 0.5):
-                x = -r
-            else:
-                x = Stage.WIDTH + r
-                x_vel *= -1
-            coll = CircleCollider(Vector2(x, y), r)
+            x = -size if left_side else Camera.right() + size
+            y = random.randint(Camera.top() + size, Camera.bottom() - size)
+            coll = CircleCollider(Vector2(x, y), size)
         else:
-            vs = []
+            verts = []
             n = random.randint(3, 8)
-            size = random.randint(25, 150)
             offset_angle = random.random() * math.pi / 2
             for i in range(n):
                 angle = math.pi * 2 / n * i + offset_angle
                 v_norm = Vector2(math.cos(angle), math.sin(angle))
-                vs.append(v_norm * size)
-            coll = PolygonCollider(Vector2(0, 0), vs)
-            y = random.randint(Stage.top() + coll.bounds.top, Stage.bottom() + coll.bounds.bottom)
-            x = 0
-            if (random.random() < 0.5):
-                x = -coll.bounds.right
-            else:
-                x = Stage.WIDTH - coll.bounds.left
-                x_vel *= -1
+                verts.append(v_norm * size)
+            coll = PolygonCollider(Vector2(0, 0), verts)
+            x = coll.bounds.left if left_side else Camera.right() + coll.bounds.right
+            y = random.randint(Camera.top() + coll.bounds.top, Camera.bottom() + coll.bounds.bottom)
             coll.pos = Vector2(x, y)
         
         platform = Platform(False, coll, cls.dynamic_platform_color)
@@ -158,12 +144,13 @@ class PlatformManager:
     def __unload_platform(cls, index: int) -> bool:
         p = cls.current_platforms[index]
 
-        if (p.is_static):
-            if (p.coll.bounds.top > Stage.bottom()):
-                return True
-            return False
+        if (p.coll.bounds.top > Camera.bottom()):
+            return True
         
-        if (p.vel.x > 0 and p.coll.bounds.left > Stage.WIDTH):
+        if (p.is_static):
+            return False
+
+        if (p.vel.x > 0 and p.coll.bounds.left > Camera.right()):
             return True
         if (p.vel.x < 0 and p.coll.bounds.right < 0):
             return True

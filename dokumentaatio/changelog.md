@@ -24,3 +24,10 @@
 - UI
 - pausing, gameover, restarting
 - better platform generation with static & dynamic platforms
+
+## Week 7
+- refactoring, fixes
+
+**Added:**
+- randomized messages to the gameover screen
+- death by squishing

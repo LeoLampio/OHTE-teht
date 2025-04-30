@@ -15,6 +15,5 @@ The application is a game in which the player tries to parkour their way up with
 ## Further Features
 - [**DONE**] Moving platforms
 - [**DONE**] UI
-
-- Player collision response still requires more work
-- The player should also die if being squished between two platforms
+- [**DONE**] The player can also die by being squished between two platforms
+- [**DONE**] The difficulty increases (static platforms become progressively scarce) as the player climbs higher

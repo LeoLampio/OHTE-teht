@@ -11,7 +11,3 @@ class Platform(Entity):
     
     def move(self):
         self.translate(self.vel * Time.dt)
-
-    def set_velocity(self, new_vel: Vector2):
-        self.vel = new_vel
-        self.is_static = self.vel == Vector2(0, 0)

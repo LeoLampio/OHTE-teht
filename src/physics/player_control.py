@@ -1,6 +1,8 @@
 import pygame
 from pygame.math import Vector2
 from utils.data.time import Time
+from utils.game_state import GameStateHandler
+from utils.data.statistics import DeathType
 from physics.collisionhandler import CollisionInfo
 from entities.entity import Entity
 
@@ -8,6 +10,7 @@ from entities.entity import Entity
 
 class PlayerController:
     def __init__(self, entity: Entity):
+        # parent
         self.entity = entity
 
         # state variables
@@ -27,8 +30,9 @@ class PlayerController:
         self.__surface_vel = Vector2(0, 0)
 
         # collision variables
-        self.last_collision_point = Vector2(0, -1000)
+        self.collision_point = None
         self.__collision_buffer: list[CollisionInfo] = []
+        self.in_collision_with = None
     
     # Compute required gravity & jump_force using parabola math
     def __initialize_gravity(self):
@@ -138,9 +142,26 @@ class PlayerController:
     def collision_response(self):
         # no collisions
         if (len(self.__collision_buffer) == 0):
+            self.collision_point = None
+            return
+        
+        # trivial collision
+        if (len(self.__collision_buffer) == 1):
+            self.__collision_resolve(self.__collision_buffer[0])
+            return
+        
+        # are you forced between a rock and a hard place?
+        if (self.is_squished()):
+            GameStateHandler.on_gameover(DeathType.Squish)
+            return
+        
+        # just push the player out of collision if stationary
+        if (self.vel == Vector2(0, 0)):
+            for c in self.__collision_buffer:
+                self.entity.coll.pos += c.get_offset_out()
             return
 
-        # find the most 'relevant' collision
+        # find the ideal collision
         diff = Vector2.dot(self.vel, self.__collision_buffer[0].normal)
         index = 0
         for i in range(1, len(self.__collision_buffer)):
@@ -150,6 +171,12 @@ class PlayerController:
                 index = i
 
         self.__collision_resolve(self.__collision_buffer[index])
+
+    def is_squished(self) -> bool:
+        for c in self.__collision_buffer:
+            if (c.overlap > 10):
+                return True
+        return False
 
     def __collision_resolve(self, info: CollisionInfo):
         # resolve collision (technically not); make the player stick to the collider
@@ -162,7 +189,7 @@ class PlayerController:
         # remove all vertical velocity upon collision with a surface
         self.vel = Vector2.dot(self.vel, self.entity.right) * self.entity.right
 
-        self.last_collision_point = info.point
+        self.collision_point = info.point
         self.__is_grounded = True
 
         # reset buffer

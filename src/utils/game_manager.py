@@ -3,14 +3,16 @@ import pygame
 from pygame.math import Vector2
 from utils.data.time import Time
 from utils.gui.stage import Stage
-from utils.gui.ui_manager import UIManager, FontAnchor, Anchor, FontSize
-from utils.platform_manager import PlatformManager
+from utils.gui.ui_manager import UIManager
+from utils.environment.platform_manager import PlatformManager
 from utils.data.statistics import StatHandler, DeathType
+from utils.game_state import GameStateHandler, State
 from entities.player import Player
 
-# Manages Game States & Updating
+# Manages the game session
 
 class GameManager:
+    # Initializes the game session variables etc
     def __init__(self):
         pygame.init()
 
@@ -24,46 +26,42 @@ class GameManager:
         self.load_content()
         self.update()
 
+    # Initializes individual game related variables
     def initialize(self):
         self.player = Player(Vector2(600, 600), 30)
         PlatformManager.begin()
+        GameStateHandler.state = State.Running
 
-        self.is_paused = False
-        self.gameover = False
-
-    # Load assets
+    # Loads external assets
     def load_content(self):
         # currently no assets
 
         # TODO Load data
         pass
 
-    # Update game state
+    # Updates game state
     def update(self):
         while (True):
             self.check_events()
+            Time.update(self.clock)
 
-            if (not self.gameover):
-                Time.update(self.clock)
-
-                if (not self.is_paused):
-                    self.gameplay_loop()
+            if (GameStateHandler.state == State.Running):
+                self.gameplay_loop()
 
             self.update_screen()
             self.clock.tick(60)
 
-    # Update entities etc
+    # Updates entities etc
     def gameplay_loop(self):
         self.player.update()
         PlatformManager.update()
         self.player.controller.collision_response()
         self.player.camera.update()
-        StatHandler.update_score()
+        StatHandler.update_score(self.player.coll.bounds.bottom)
     
     # Rendering phase of the update cycle
     def update_screen(self):
-        if (self.gameover):
-            Stage.draw_custom_background((0, 0, 0))
+        if (GameStateHandler.state == State.Ended):
             UIManager.gameover_view()
         else:
             Stage.draw_background()
@@ -71,20 +69,18 @@ class GameManager:
             PlatformManager.draw()
             self.player.draw()
 
-            UIManager.update_text(f"SCORE: {StatHandler.score:.0f}", (10, 10))
-
-            if (self.is_paused):
+            if (GameStateHandler.state == State.Paused):
                 UIManager.pause_view()
-                UIManager.update_text_anchored("press ESC to continue", FontAnchor(Anchor.LEFT, Anchor.RIGHT), (10, -10))
             else:
-                UIManager.update_text_anchored("press ESC to pause", FontAnchor(Anchor.LEFT, Anchor.RIGHT), (10, -10), color=(160, 160, 160))
+                UIManager.game_view()
 
         pygame.display.flip()
     
+    # Checks events for gameover, quitting, resetting and pausing
     def check_events(self):
-        if (not self.gameover and not self.is_paused):
-            if (self.player.camera.is_out_of_frustum()):
-                self.on_gameover(DeathType.Fall)
+        if (GameStateHandler.state == State.Running):
+            if (self.player.camera.is_below_frustum()):
+                GameStateHandler.on_gameover(DeathType.Fall)
 
         for event in pygame.event.get():
             if (event.type == pygame.QUIT):
@@ -92,14 +88,14 @@ class GameManager:
             
             if (event.type != pygame.KEYDOWN):
                 continue
-
-            if (self.gameover):
+            
+            if (GameStateHandler.state == State.Ended):
                 if (event.key == pygame.K_RETURN):
                     self.reset()
-            else:
-                if (event.key == pygame.K_ESCAPE):
-                    self.is_paused = not self.is_paused
+            if (event.key == pygame.K_ESCAPE):
+                GameStateHandler.on_pause()
 
+    # Restarts the game
     def reset(self):
         Stage.Offset = Vector2(0, 0)
         PlatformManager.reset()
@@ -107,10 +103,7 @@ class GameManager:
         StatHandler.reset()
         self.initialize()
 
-    def on_gameover(self, death_type: DeathType):
-        self.gameover = True
-        StatHandler.initiate_death(death_type)
-
+    # Handles quitting
     def on_exit(self):
         # TODO Save data
         sys.exit()

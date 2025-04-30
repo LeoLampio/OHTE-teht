@@ -19,26 +19,6 @@ class Stage:
         cls.HEIGHT = surf.get_height()
 
     @classmethod
-    def left(cls):
-        return -int(Stage.Offset.x)
-    
-    @classmethod
-    def right(cls):
-        return int(cls.WIDTH - Stage.Offset.x)
-    
-    @classmethod
-    def top(cls):
-        return -int(Stage.Offset.y)
-    
-    @classmethod
-    def bottom(cls):
-        return int(Stage.HEIGHT - Stage.Offset.y)
-
-    @classmethod
-    def draw_ui_element(cls, surf: Surface, pos: tuple):
-        cls.__stage.blit(surf, pos)
-
-    @classmethod
     def draw_background(cls):
         cls.__stage.fill(cls.__back_col)
 
@@ -47,9 +27,13 @@ class Stage:
         cls.__stage.fill(bg)
 
     @classmethod
+    def draw_ui_element(cls, surf: Surface, pos: tuple):
+        cls.__stage.blit(surf, pos)
+
+    @classmethod
     def draw_circle(cls, pos: Vector2, radius: float, color: tuple):
-        pygame.draw.circle(cls.__stage, color, pos + cls.Offset, radius)
+        pygame.draw.circle(cls.__stage, color, pos - cls.Offset, radius)
 
     @classmethod
     def draw_polygon(cls, vertices: list, color: tuple):
-        pygame.draw.polygon(cls.__stage, color, [v + cls.Offset for v in vertices])
+        pygame.draw.polygon(cls.__stage, color, [v - cls.Offset for v in vertices])

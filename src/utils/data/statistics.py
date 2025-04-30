@@ -1,11 +1,13 @@
-from enum import Enum
 import random
+from enum import Enum
 from utils.gui.stage import Stage
-from entities.player import Player
 
+# How the game ended
 class DeathType(Enum):
     Fall = 0,
     Squish = 1
+
+# Handles data
 
 class StatHandler:
     score = 0
@@ -17,10 +19,10 @@ class StatHandler:
     death_msg = ""
 
     @classmethod
-    def update_score(cls):
+    def update_score(cls, player_height: int):
         cls.score = max(
             cls.score,
-            (Stage.HEIGHT / 2 - Player.instance.coll.pos.y) // 50
+            (Stage.HEIGHT / 2 - player_height) // 50
         )
 
     @classmethod
@@ -33,27 +35,48 @@ class StatHandler:
             cls.death_msg= DeathMessages.highscore_msg
             cls.highscore = cls.score
         elif (death_type == DeathType.Fall):
-            cls.death_msg = random.choice(DeathMessages.fall_msgs)
+            cls.fall_count += 1
+            cls.death_msg = DeathMessages.get_fall_msg()
         elif (death_type == DeathType.Squish):
-            cls.death_msg = random.choice(DeathMessages.squish_msgs)
+            cls.squish_count += 1
+            cls.death_msg = DeathMessages.get_squish_msg()
 
     @classmethod
     def reset(cls):
         cls.score = 0
-        cls.death_msg = ""
 
     # TODO Save & Load functionality
 
 class DeathMessages:
 
-    fall_msgs = [
+    @classmethod
+    def get_fall_msg(cls) -> str:
+        if (random.random() < 1 / 3):
+            return f"you have fallen {StatHandler.fall_count} time{'s' if StatHandler.fall_count != 1 else ''}"
+        
+        msg = random.choice(cls.__fall_msgs)
+        while (msg == StatHandler.death_msg):
+            msg = random.choice(cls.__fall_msgs)
+        return msg
+    
+    @classmethod
+    def get_squish_msg(cls) -> str:
+        if (random.random() < 1 / 3):
+            return f"current scoreboard is 0 - {StatHandler.squish_count}, in favor of the platforms"
+        msg = random.choice(cls.__squish_msgs)
+        while (msg == StatHandler.death_msg):
+            msg = random.choice(cls.__squish_msgs)
+        return msg
+
+    __fall_msgs = [
         "you're supposed to go up",
-        f"you have fallen {StatHandler.fall_count} time{'s' if StatHandler.fall_count != 1 else ''}",
         "is it cozy down there?",
         "the abyss is glad to have you",
         "the underground is vast. You may even find a skeleton or two"
     ]
-    squish_msgs = [
-
+    __squish_msgs = [
+        "please be more vigilant next time",
+        "well that was gruesome",
+        "the platforms won't wait for you"
     ]
     highscore_msg = "you've reached new heights!"

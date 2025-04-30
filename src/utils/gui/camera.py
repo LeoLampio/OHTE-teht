@@ -7,20 +7,51 @@ from entities.entity import Entity
 
 class Camera:
     def __init__(self, entity: Entity):
+        # parent
         self.entity = entity
         # linear interpolation speed (easing speed)
         self.lerp_speed = 10
-        # if the player is above this y-value, the screen should move
+        # if the player's distance from the camera's top is this
+        # the screen should move
         self.boundary = 300
-        self.death_plane = 100
-    
+
     def update(self):
-        pos = self.entity.coll.pos + Stage.Offset
-        if (pos.y > self.boundary):
+        if (not self.should_move()):
             return
         
-        d = self.boundary - pos.y
-        Stage.Offset.y += lerp(d, 0, self.lerp_speed * Time.dt)
+        delta = self.entity.coll.bounds.bottom - Camera.top() - self.boundary
+        Stage.Offset.y += lerp(delta, 0, self.lerp_speed * Time.dt)
 
-    def is_out_of_frustum(self) -> bool:
-        return self.entity.coll.pos.y + Stage.Offset.y > Stage.HEIGHT + self.death_plane
+    def should_move(self) -> bool:
+        return self.entity.coll.bounds.bottom < Camera.top() + self.boundary
+
+    def is_below_frustum(self) -> bool:
+        return self.entity.coll.bounds.top > Camera.bottom()
+
+# Bounds
+
+    @classmethod
+    def left(cls) -> int:
+        return int(Stage.Offset.x)
+    
+    @classmethod
+    def right(cls) -> int:
+        return int(Stage.WIDTH + Stage.Offset.x)
+    
+    @classmethod
+    def top(cls) -> int:
+        return int(Stage.Offset.y)
+    
+    @classmethod
+    def bottom(cls) -> int:
+        return int(Stage.HEIGHT + Stage.Offset.y)
+    
+# Center Coordinates
+
+    @classmethod
+    def horizontal_center(cls) -> int:
+        return (cls.left() + cls.right()) // 2
+    
+    @classmethod
+    def vertical_center(cls) -> int:
+        return (cls.top() + cls.bottom()) // 2
