@@ -11,5 +11,4 @@
 |      | 1 h | improved modularity |
 | 29.4 | 6 h | added UI and better platform generation |
 | 30.4 | 5 h | refactoring, fixed funky physics |
-
-TOTAL: 31 h
+| **TOTAL** | **31 h** |  |
