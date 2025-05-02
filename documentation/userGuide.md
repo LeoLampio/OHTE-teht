@@ -11,6 +11,10 @@ While stuck to a platform you can:
 
 If sufficiently close, the character can move between platforms without jumping.
 
-Gravity always points down. This means the character will accelerate downwards while midair (only while midair).
+Gravity always points down. This means the character will accelerate downwards while midair.
 
-...
+## Gameover
+If the character falls below the window, you gameover.\
+Additionally, though there are no walls around the edges of the window, platforms do get deleted outside these bounds.
+
+Due to the platforms being solid objects, the character can get 'squished' between them resulting in a gameover.
