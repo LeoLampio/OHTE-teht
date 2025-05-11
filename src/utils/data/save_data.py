@@ -32,6 +32,8 @@ class SaveManager:
                 old = json.loads(target.read())
             updated = cls.__copy_data(data, old)
         else:
+            if (not os.path.exists('src/assets')):
+                os.mkdir('src/assets')
             updated = data
 
         with open(cls.__path, 'w', encoding='utf-8') as target:
