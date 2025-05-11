@@ -15,7 +15,8 @@ Tested on a Cubbli machine with Python 3.10.
 
 ## Releases
 [Week 5](https://github.com/LeoLampio/OHTE-teht/releases/tag/Week5)\
-[Week 6](https://github.com/LeoLampio/OHTE-teht/releases/tag/Week6)
+[Week 6](https://github.com/LeoLampio/OHTE-teht/releases/tag/Week6)\
+[FINAL RELEASE](https://github.com/LeoLampio/OHTE-teht/releases/tag/Final2)
 
 ## Install Dependencies
 ```poetry install```
