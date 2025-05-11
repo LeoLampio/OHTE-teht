@@ -5,12 +5,12 @@ from utils.data.save_data import SaveManager
 
 # How the game ended
 class DeathType(Enum):
-    Fall = 0,
-    Squish = 1
+    FALL = 0,
+    SQUISH = 1
 
 # Handles data
-
 class StatHandler:
+    """Handles player session variables."""
     score = 0
     highscore = 0
 
@@ -30,21 +30,24 @@ class StatHandler:
     def is_highscore(cls) -> bool:
         return cls.score > cls.highscore
     
+    # Update stats after a death occured
+    # Set a randomized death message based on the type of death
     @classmethod
     def initiate_death(cls, death_type: DeathType):
-        if (death_type == DeathType.Fall):
+        if (death_type == DeathType.FALL):
             cls.fall_count += 1
-        elif (death_type == DeathType.Squish):
+        elif (death_type == DeathType.SQUISH):
             cls.squish_count += 1
         
         if (cls.is_highscore()):
             cls.death_msg = DeathMessages.highscore_msg
             cls.highscore = cls.score
-        elif (death_type == DeathType.Fall):
+        elif (death_type == DeathType.FALL):
             cls.death_msg = DeathMessages.get_fall_msg()
-        elif (death_type == DeathType.Squish):
+        elif (death_type == DeathType.SQUISH):
             cls.death_msg = DeathMessages.get_squish_msg()
 
+    # Save data to file
     @classmethod
     def save(cls):
         cls.score = 0
@@ -55,6 +58,7 @@ class StatHandler:
         }
         SaveManager.encode(data)
 
+    # Load data from a file, if it exists
     @classmethod
     def initialize(cls, data: dict):
         if (data is None):
@@ -63,6 +67,7 @@ class StatHandler:
         cls.fall_count = data['fall_count']
         cls.squish_count = data['squish_count']
 
+# Manages death messages
 class DeathMessages:
 
     @classmethod

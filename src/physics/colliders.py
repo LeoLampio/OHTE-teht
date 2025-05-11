@@ -29,6 +29,10 @@ class Collider:
 
 class CircleCollider(Collider):
     def __init__(self, pos, radius):
+        """
+        pos = center position in world space\n
+        radius = circle radius
+        """
         super().__init__(pos)
         self.__r = max(1, radius)
         self.__r2 = self.__r**2

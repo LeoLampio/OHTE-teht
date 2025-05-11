@@ -1,5 +1,5 @@
-from pygame import font
 from enum import Enum
+from pygame import font
 from utils.gui.stage import Stage, Surface
 from utils.data.statistics import StatHandler
 
@@ -40,7 +40,7 @@ class Fonts:
 # Manages UI elements
 
 class UIManager:
-
+    """Used to create UI elements."""
     @classmethod
     def initialize(cls):
         Fonts.small = font.SysFont('Arial', 20)
@@ -54,7 +54,8 @@ class UIManager:
 
     # Renders text using the given anchor
     @classmethod
-    def render_text_anchored(cls, text: str, anchor: FontAnchor, offset: tuple, size: FontSize = FontSize.SMALL, color: tuple = (255, 255, 255)):
+    def render_text_anchored(cls, text: str, anchor: FontAnchor, offset: tuple, 
+                             size: FontSize = FontSize.SMALL, color: tuple = (255, 255, 255)):
         surf = Fonts.get_font(size).render(text, True, color)
         x = offset[0]
         y = offset[1]
@@ -91,7 +92,12 @@ class UIManager:
     @classmethod
     def gameover_view(cls):
         Stage.draw_custom_background((0, 0, 0))
-        cls.render_text_anchored("GAMEOVER", FontAnchor(Anchor.CENTER, Anchor.CENTER), (0, -100), FontSize.LARGE, (255, 128, 128))
-        cls.render_text_anchored(StatHandler.death_msg, FontAnchor(Anchor.CENTER, Anchor.CENTER), (0, -50), FontSize.SMALL, (160, 160, 160))
-        cls.render_text_anchored(f"Final Score: {StatHandler.score:.0f}", FontAnchor(Anchor.CENTER, Anchor.CENTER), (0, 0), FontSize.MEDIUM, (128, 255, 128))
-        cls.render_text_anchored("press ENTER to play again", FontAnchor(Anchor.CENTER, Anchor.CENTER), (0, 50), FontSize.SMALL, (128, 128, 128))
+        cls.render_text_anchored(
+            "GAMEOVER", FontAnchor(Anchor.CENTER, Anchor.CENTER), (0, -100), FontSize.LARGE, (255, 128, 128))
+        cls.render_text_anchored(
+            StatHandler.death_msg, FontAnchor(Anchor.CENTER, Anchor.CENTER), (0, -50), FontSize.SMALL, (160, 160, 160))
+        cls.render_text_anchored(
+            f"Final Score: {StatHandler.score:.0f}", FontAnchor(Anchor.CENTER, Anchor.CENTER), 
+            (0, 0), FontSize.MEDIUM, (128, 255, 128))
+        cls.render_text_anchored(
+            "press ENTER to play again", FontAnchor(Anchor.CENTER, Anchor.CENTER), (0, 50), FontSize.SMALL, (128, 128, 128))

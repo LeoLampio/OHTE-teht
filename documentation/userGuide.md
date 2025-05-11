@@ -18,3 +18,5 @@ If the character falls below the window, you gameover.\
 Additionally, though there are no walls around the edges of the window, platforms do get deleted outside these bounds.
 
 Due to the platforms being solid objects, the character can get 'squished' between them resulting in a gameover.
+
+#### For instructions on the application set up, refer to ![README](https://github.com/LeoLampio/OHTE-teht/blob/main/README.md)

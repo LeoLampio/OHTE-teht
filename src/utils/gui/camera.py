@@ -7,6 +7,7 @@ from entities.entity import Entity
 
 class Camera:
     def __init__(self, entity: Entity):
+        """Camera component of entity, which allows the screen to follow the entity."""
         # parent
         self.entity = entity
         # linear interpolation speed (easing speed)
@@ -16,13 +17,13 @@ class Camera:
         self.boundary = 300
 
     def update(self):
-        if (not self.should_move()):
+        if (not self.__should_move()):
             return
         
         delta = self.entity.coll.bounds.bottom - Camera.top() - self.boundary
         Stage.Offset.y += lerp(delta, 0, self.lerp_speed * Time.dt)
 
-    def should_move(self) -> bool:
+    def __should_move(self) -> bool:
         return self.entity.coll.bounds.bottom < Camera.top() + self.boundary
 
     def is_below_frustum(self) -> bool:

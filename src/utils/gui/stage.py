@@ -5,6 +5,7 @@ from pygame.surface import Surface
 # Handle Drawing & Window Properties
 
 class Stage:
+    """A tool used to draw elements on screen."""
     WIDTH = 0
     HEIGHT = 0
     Offset = Vector2(0, 0)

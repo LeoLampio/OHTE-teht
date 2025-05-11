@@ -31,7 +31,7 @@ class GameManager:
     def initialize(self):
         self.player = Player(Vector2(600, 600), 30)
         PlatformManager.begin()
-        GameStateHandler.state = State.Running
+        GameStateHandler.state = State.RUNNING
 
     # Loads external assets
     def load_content(self):
@@ -43,7 +43,7 @@ class GameManager:
             self.check_events()
             Time.update(self.clock)
 
-            if (GameStateHandler.state == State.Running):
+            if (GameStateHandler.state == State.RUNNING):
                 self.gameplay_loop()
 
             self.update_screen()
@@ -59,7 +59,7 @@ class GameManager:
     
     # Rendering phase of the update cycle
     def update_screen(self):
-        if (GameStateHandler.state == State.Ended):
+        if (GameStateHandler.state == State.ENDED):
             UIManager.gameover_view()
         else:
             Stage.draw_background()
@@ -67,7 +67,7 @@ class GameManager:
             PlatformManager.draw()
             self.player.draw()
 
-            if (GameStateHandler.state == State.Paused):
+            if (GameStateHandler.state == State.PAUSED):
                 UIManager.pause_view()
             else:
                 UIManager.game_view()
@@ -76,9 +76,9 @@ class GameManager:
     
     # Checks events for gameover, quitting, resetting and pausing
     def check_events(self):
-        if (GameStateHandler.state == State.Running):
+        if (GameStateHandler.state == State.RUNNING):
             if (self.player.camera.is_below_frustum()):
-                GameStateHandler.on_gameover(DeathType.Fall)
+                GameStateHandler.on_gameover(DeathType.FALL)
 
         for event in pygame.event.get():
             if (event.type == pygame.QUIT):
@@ -87,7 +87,7 @@ class GameManager:
             if (event.type != pygame.KEYDOWN):
                 continue
             
-            if (GameStateHandler.state == State.Ended):
+            if (GameStateHandler.state == State.ENDED):
                 if (event.key == pygame.K_RETURN):
                     self.reset()
             if (event.key == pygame.K_ESCAPE):

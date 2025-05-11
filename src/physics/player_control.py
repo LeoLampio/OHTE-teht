@@ -10,6 +10,7 @@ from entities.entity import Entity
 
 class PlayerController:
     def __init__(self, entity: Entity):
+        """Component, which transforms keyboard input to physics movement."""
         # parent
         self.entity = entity
 
@@ -152,7 +153,7 @@ class PlayerController:
         
         # are you forced between a rock and a hard place?
         if (self.is_squished()):
-            GameStateHandler.on_gameover(DeathType.Squish)
+            GameStateHandler.on_gameover(DeathType.SQUISH)
             return
         
         # just push the player out of collision if stationary

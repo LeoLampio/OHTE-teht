@@ -10,10 +10,11 @@ The application is a game in which the player tries to parkour their way up with
 - [**DONE**] As the player climbs higher the camera moves up (never down)
 - [**DONE**] If the player falls below the screen, the game ends
 - [**DONE**] The distance climbed functions as the score
-- Store high score in a file
+- [**DONE**] Store high score in a file
 
 ## Further Features
 - [**DONE**] Some platforms move
 - [**DONE**] UI: score counter, pausing, gameover screen
 - [**DONE**] The player can also die by being squished between two platforms
 - [**DONE**] The difficulty increases (static platforms become progressively scarce) as the player climbs higher
+- [**DONE**] Further data about the player is also saved

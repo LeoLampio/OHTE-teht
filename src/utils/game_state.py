@@ -2,9 +2,9 @@ from enum import Enum
 from utils.data.statistics import DeathType, StatHandler
 
 class State(Enum):
-    Running = 0,
-    Paused = 1,
-    Ended = 2
+    RUNNING = 0,
+    PAUSED = 1,
+    ENDED = 2
 
 # Manages game states
 class GameStateHandler:
@@ -12,14 +12,14 @@ class GameStateHandler:
 
     @classmethod
     def on_pause(cls):
-        if (cls.state == State.Ended):
+        if (cls.state == State.ENDED):
             return
-        if (cls.state == State.Running):
-            cls.state = State.Paused
+        if (cls.state == State.RUNNING):
+            cls.state = State.PAUSED
         else:
-            cls.state = State.Running
+            cls.state = State.RUNNING
 
     @classmethod
     def on_gameover(cls, death_type: DeathType):
         StatHandler.initiate_death(death_type)
-        cls.state = State.Ended
+        cls.state = State.ENDED

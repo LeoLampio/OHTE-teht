@@ -11,6 +11,7 @@ from entities.platform import Platform
 # Generates and updates Platform objects
 
 class PlatformManager:
+    """Stores & updates platforms and controls their procedural generation."""
     current_platforms: list[Platform] = []
 
     # Static Platform Variables
@@ -27,6 +28,7 @@ class PlatformManager:
 
 # Control Methods
 
+    # Ran at the beginning of a game
     @classmethod
     def begin(cls):
         start_platform_coll = CircleCollider(Vector2(Camera.horizontal_center(), Camera.bottom() - 150), 100)
@@ -54,18 +56,22 @@ class PlatformManager:
 
 # Generation Methods
 
+    # Is the player high enough for the next static platform to appear
     @classmethod
     def __spawn_next_static(cls) -> bool:
         return Camera.top() < cls.next_static_bottom
     
+    # Is it time to spawn the next dynamic platform
     @classmethod
     def __spawn_next_dynamic(cls) -> bool:
         return cls.spawn_timer > cls.spawn_delay
     
+    # The distance between static platforms increases as the player gets higher
     @classmethod
     def __increase_difficulty(cls):
         cls.static_dist += 100
 
+    # Generate platforms, if possible
     @classmethod
     def __generate(cls):
         while (cls.__spawn_next_static()):
@@ -77,6 +83,7 @@ class PlatformManager:
             cls.spawn_timer = 0
             cls.__create_dynamic()
     
+    # Create a static platform
     @classmethod
     def __create_static(cls):
         size = random.randint(25, 150)
@@ -94,7 +101,7 @@ class PlatformManager:
                 v_norm = Vector2(math.cos(angle), math.sin(angle))
                 verts.append(v_norm * size)
             coll = PolygonCollider(Vector2(0, 0), verts)
-            x = random.randint(-coll.bounds.left, Camera.right() - coll.bounds.right)
+            x = random.randint(-1 * coll.bounds.left, Camera.right() - coll.bounds.right)
             y = cls.next_static_bottom - coll.bounds.bottom
             coll.pos = Vector2(x, y)
         
@@ -102,6 +109,7 @@ class PlatformManager:
         cls.current_platforms.append(platform)
         cls.next_static_bottom = coll.bounds.top - cls.static_dist
 
+    # Create a dynamic platform
     @classmethod
     def __create_dynamic(cls):
         left_side = random.random() < 0.5
@@ -129,6 +137,7 @@ class PlatformManager:
         platform.vel = Vector2(x_vel, 0)
         cls.current_platforms.append(platform)
 
+    # Go over platforms to see if any are due for deletion
     @classmethod
     def __unload(cls):
         n = len(cls.current_platforms)
@@ -140,6 +149,7 @@ class PlatformManager:
                 continue
             i += 1
     
+    # Can this platform be deleted
     @classmethod
     def __unload_platform(cls, index: int) -> bool:
         p = cls.current_platforms[index]
@@ -158,6 +168,7 @@ class PlatformManager:
 
 # Platform Updating
 
+    # Move dynamic platforms & check collision against player
     @classmethod
     def __update_platforms(cls):
         for c in cls.current_platforms:
