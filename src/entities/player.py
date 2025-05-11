@@ -9,6 +9,7 @@ from utils.gui.camera import Camera
 # Player entity
 
 class Player(Entity):
+    # Singleton (only 1 player is allowed)
     instance: 'Player' = None
 
     def __init__(self, start_pos: Vector2, radius: float):
