@@ -7,6 +7,7 @@ from utils.gui.ui_manager import UIManager
 from utils.environment.platform_manager import PlatformManager
 from utils.data.statistics import StatHandler, DeathType
 from utils.game_state import GameStateHandler, State
+from utils.data.save_data import SaveManager
 from entities.player import Player
 
 # Manages the game session
@@ -34,10 +35,7 @@ class GameManager:
 
     # Loads external assets
     def load_content(self):
-        # currently no assets
-
-        # TODO Load data
-        pass
+        StatHandler.initialize(SaveManager.decode())
 
     # Updates game state
     def update(self):
@@ -97,13 +95,13 @@ class GameManager:
 
     # Restarts the game
     def reset(self):
+        StatHandler.save()
         Stage.Offset = Vector2(0, 0)
         PlatformManager.reset()
         Player.instance = None
-        StatHandler.reset()
         self.initialize()
 
     # Handles quitting
     def on_exit(self):
-        # TODO Save data
+        StatHandler.save()
         sys.exit()

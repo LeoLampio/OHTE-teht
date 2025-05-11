@@ -1,6 +1,7 @@
 import random
 from enum import Enum
 from utils.gui.stage import Stage
+from utils.data.save_data import SaveManager
 
 # How the game ended
 class DeathType(Enum):
@@ -31,21 +32,36 @@ class StatHandler:
     
     @classmethod
     def initiate_death(cls, death_type: DeathType):
-        if (cls.is_highscore()):
-            cls.death_msg= DeathMessages.highscore_msg
-            cls.highscore = cls.score
-        elif (death_type == DeathType.Fall):
+        if (death_type == DeathType.Fall):
             cls.fall_count += 1
-            cls.death_msg = DeathMessages.get_fall_msg()
         elif (death_type == DeathType.Squish):
             cls.squish_count += 1
+        
+        if (cls.is_highscore()):
+            cls.death_msg = DeathMessages.highscore_msg
+            cls.highscore = cls.score
+        elif (death_type == DeathType.Fall):
+            cls.death_msg = DeathMessages.get_fall_msg()
+        elif (death_type == DeathType.Squish):
             cls.death_msg = DeathMessages.get_squish_msg()
 
     @classmethod
-    def reset(cls):
+    def save(cls):
         cls.score = 0
+        data = {
+            'highscore': int(cls.highscore),
+            'fall_count': cls.fall_count,
+            'squish_count': cls.squish_count
+        }
+        SaveManager.encode(data)
 
-    # TODO Save & Load functionality
+    @classmethod
+    def initialize(cls, data: dict):
+        if (data is None):
+            return
+        cls.highscore = int(data['highscore'])
+        cls.fall_count = data['fall_count']
+        cls.squish_count = data['squish_count']
 
 class DeathMessages:
 
